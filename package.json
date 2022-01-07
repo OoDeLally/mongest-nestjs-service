@@ -8,7 +8,7 @@
     "/dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig-build.json",
+    "build": "rm -fr ./dist && tsc -p tsconfig-build.json",
     "lint": "eslint src tests",
     "prepare": "npm run build",
     "test": "ts-mocha --paths -p ./tsconfig.json tests/**/*.test.ts",
