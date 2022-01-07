@@ -4,7 +4,8 @@
 
 This is a BETA, and therefore you may encounter bugs. Please [post an issue](https://github.com/OoDeLally/mongest-service/issues) if needed.
 
-<!-- Note: If you happen to use GraphQL, use <FIXME> instead, which also includes resolver boilerplates. -->
+
+Note: If you happen to use GraphQL and optionally [ReactAdmin](https://github.com/marmelab/react-admin), use also [ra-data-graphql-simple-mongest-resolver](https://github.com/OoDeLally/ra-data-graphql-simple-mongest-resolver), which includes automatic resolver boilerplates.
 
 ## TL;DR
 
@@ -20,15 +21,13 @@ This is a BETA, and therefore you may encounter bugs. Please [post an issue](htt
 Install (if not already there) the peer dependencies:
 
 ```bash
-npm install @nestjs/mongoose
-npm install mongodb
-npm install mongoose
+npm install --save mongodb mongoose @nestjs/mongoose
 ```
 
 Then install the `mongest-service` lib:
 
 ```bash
-npm install mongest-service
+npm install --save mongest-service
 ```
 
 Now you can create your entity and your service:
