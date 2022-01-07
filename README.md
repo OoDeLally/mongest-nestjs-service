@@ -12,6 +12,7 @@ This is a BETA, and therefore you may encounter bugs. Please [post an issue](htt
 * All returned documents are leans, but casted as instance of their entity class.
 * Amazing discriminator-based polymorphism!
 * Precise and safe typing in and out for all mongoose functions (sensitive to projection!).
+* Fully overridable and expandable NestJS service.
 
 
 # Setup
