@@ -2,9 +2,13 @@
   "name": "mongest-service",
   "version": "0.0.1",
   "description": "Delightfully-typed Mongoose-wrapper NestJS-service",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig-build.json",
     "lint": "eslint src tests",
     "prepare": "npm run build",
     "test": "ts-mocha --paths -p ./tsconfig.json tests/**/*.test.ts",
