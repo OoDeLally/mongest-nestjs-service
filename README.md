@@ -42,12 +42,12 @@ export class Cat {
 
 
 @Injectable()
-export class CatsService extends MongestService(Cat) {}
+export class CatsService extends BuildMongestService(Cat) {}
 
 // or...
 
 @Injectable()
-export class CatsService extends MongestService(Cat) {
+export class CatsService extends BuildMongestService(Cat) {
   constructor(@InjectModel(Cat.name) public model: Model<Cat>) {
     // If you ever need to override the constructor (e.g. to add additional dependencies),
     // dont forget to explicitely inject the model to super().
