@@ -40,6 +40,8 @@ export class Cat {
   name!: string;
 }
 
+export type CatDoc = MongoDoc<Cat>;
+
 
 @Injectable()
 export class CatsService extends BuildMongestService(Cat) {}
@@ -53,7 +55,7 @@ export class CatsService extends BuildMongestService(Cat) {
     // dont forget to explicitely inject the model to super().
     super(model);
   }
-  async myCustomMethod(): Promise<Cat[]> {
+  async myCustomMethod(): Promise<CatDoc[]> {
     return await this.find({ name: 'pogo' });
   }
 }
