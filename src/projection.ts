@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ObjectId } from 'mongodb';
-import { EntityPayload, MongoDoc } from 'src/types';
+import { EntityPayload, MongoDoc } from './types';
 
 // Known limitations:
 // Mongo's projection has much more features than just deciding whether we include a given field or not.

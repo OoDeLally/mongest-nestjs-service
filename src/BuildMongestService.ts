@@ -4,7 +4,6 @@ import { Injectable, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId, UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
-import { AbstractType, EntityPayload, MongoDoc } from 'src/types';
 import {
   CountDocumentsOptions,
   DeleteManyOptions,
@@ -24,6 +23,7 @@ import {
 import { paginateQuery } from './pagination';
 import { MongoProjection } from './projection';
 import { getEntityClassForSchema } from './registerEntityClassForSchema';
+import { AbstractType, EntityPayload, MongoDoc } from './types';
 
 export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
   EntityClass: Type<T>,
