@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Injectable, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ObjectId, UpdateResult } from 'mongodb';
+import { UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
 import {
   CountDocumentsOptions,
@@ -23,16 +23,19 @@ import {
 import { paginateQuery } from './pagination';
 import { MongoProjection } from './projection';
 import { getEntityClassForSchema } from './registerEntityClassForSchema';
-import { AbstractType, EntityPayload, MongoDoc } from './types';
+import { AbstractType, EntityPayload, ExtractIdType, OmitId } from './types';
 
-export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
-  EntityClass: Type<T>,
-): AbstractType<MongestService<T, IdType>> {
+export function BuildMongestService<EDoc extends EntityPayload>(
+  EntityClass: Type<EDoc>,
+): AbstractType<MongestService<EDoc>> {
+  type E = OmitId<EDoc>;
+  type IdType = ExtractIdType<EDoc>;
+
   @Injectable()
-  abstract class BaseServiceHost implements MongestService<T, IdType> {
+  abstract class BaseServiceHost implements MongestService<EDoc> {
     protected readonly discriminatorKey: string | null;
 
-    constructor(@InjectModel(EntityClass.name) public model: Model<T>) {
+    constructor(@InjectModel(EntityClass.name) public model: Model<EDoc>) {
       if (!model) {
         throw Error(
           `MongestService received an ${model} model for ${EntityClass.name}.\n` +
@@ -51,7 +54,7 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     async countDocuments(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
+      filter?: FilterQuery<EDoc>,
       options?: CountDocumentsOptions,
     ): Promise<number> {
       const query = this.model.countDocuments(filter || {}, options);
@@ -60,14 +63,14 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     async deleteMany(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
+      filter?: FilterQuery<EDoc>,
       options?: DeleteManyOptions,
     ): Promise<DeleteResult> {
       const query = this.model.deleteMany(filter || {});
       return await paginateQuery<any, any>(query, options).lean().exec();
     }
 
-    async deleteOne(filter?: FilterQuery<MongoDoc<T, IdType>>): Promise<DeleteResult> {
+    async deleteOne(filter?: FilterQuery<EDoc>): Promise<DeleteResult> {
       return await this.model
         .deleteOne(filter || {})
         .lean()
@@ -75,24 +78,22 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     async deleteById(id: IdType): Promise<DeleteResult> {
-      return await this.model.deleteOne({ _id: id } as FilterQuery<MongoDoc<T, IdType>>);
+      return await this.model.deleteOne({ _id: id } as FilterQuery<EDoc>);
     }
 
     async find<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      options?: FindOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>[]> {
+      filter?: FilterQuery<EDoc>,
+      options?: FindOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P>[]> {
       const query = this.model.find(filter || {}, options?.projection, options);
-      const docs = await paginateQuery<T>(query, options).lean().exec();
-      return docs.map(
-        (doc) => this.castToEntityInstance(doc) as DocOrProjectedDoc<MongoDoc<T, IdType>, P>,
-      );
+      const docs = await paginateQuery<E>(query, options).lean().exec();
+      return docs.map((doc) => this.castToEntityInstance(doc) as DocOrProjectedDoc<EDoc, P>);
     }
 
     async findOne<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      options?: FindOneOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+      filter?: FilterQuery<EDoc>,
+      options?: FindOneOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const query = this.model.findOne(filter || {}, options?.projection);
       const doc = await paginateQuery<any, any>(query, options).lean().exec();
       if (!doc) {
@@ -102,9 +103,9 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     async findOneAndDelete<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      options?: FindOneAndDeleteOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+      filter?: FilterQuery<EDoc>,
+      options?: FindOneAndDeleteOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const deletedDoc = await this.model.findOneAndDelete(filter, options);
       if (!deletedDoc) {
         return null;
@@ -113,23 +114,23 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     findOneAndUpdate<P extends MongoProjection | undefined = undefined>(
-      filter: FilterQuery<MongoDoc<T, IdType>>,
-      payload: UpdateQuery<T>,
-      options: FindOneAndUpdateOptions<T, P> & { new: true; upsert: true },
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+      filter: FilterQuery<EDoc>,
+      payload: UpdateQuery<E>,
+      options: FindOneAndUpdateOptions<E, P> & { new: true; upsert: true },
+    ): Promise<DocOrProjectedDoc<EDoc, P>>;
     findOneAndUpdate<P extends MongoProjection | undefined = undefined>(
-      filter: FilterQuery<MongoDoc<T, IdType>>,
-      payload: UpdateQuery<T>,
-      options?: FindOneAndUpdateOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+      filter: FilterQuery<EDoc>,
+      payload: UpdateQuery<E>,
+      options?: FindOneAndUpdateOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
     async findOneAndUpdate<P extends MongoProjection | undefined = undefined>(
-      filter: FilterQuery<MongoDoc<T, IdType>>,
-      payload: UpdateQuery<T>,
-      options?: FindOneAndUpdateOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+      filter: FilterQuery<EDoc>,
+      payload: UpdateQuery<E>,
+      options?: FindOneAndUpdateOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const doc = await this.model
-        .findOneAndUpdate(filter, payload as UpdateQuery<T>, {
+        .findOneAndUpdate(filter, payload as UpdateQuery<E>, {
           ...options,
           overwriteDiscriminatorKey: true,
         })
@@ -144,7 +145,7 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     async findById<P extends MongoProjection | undefined = undefined>(
       id: IdType,
       options?: FindByIdOptions<P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const doc = await this.model.findById(id, options?.projection).lean().exec();
       if (!doc) {
         return null;
@@ -155,7 +156,7 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     async findByIdOrThrow<P extends MongoProjection | undefined = undefined>(
       id: IdType,
       options?: FindByIdOptions<P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>> {
+    ): Promise<DocOrProjectedDoc<EDoc, P>> {
       const doc = await this.findById(id, options);
       if (!doc) {
         throw new NotFoundException(`Doc ${this.model.modelName} ${id} not found`);
@@ -165,25 +166,21 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
 
     findByIdAndUpdate<P extends MongoProjection | undefined = undefined>(
       id: IdType,
-      payload: UpdateQuery<T>,
+      payload: UpdateQuery<E>,
       options: FindByIdAndUpdateOptions<P> & { new: true; upsert: true },
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+    ): Promise<DocOrProjectedDoc<EDoc, P>>;
     findByIdAndUpdate<P extends MongoProjection | undefined = undefined>(
       id: IdType,
-      payload: UpdateQuery<T>,
+      payload: UpdateQuery<E>,
       options?: FindByIdAndUpdateOptions<P> & ({ new?: false } | { upsert?: false }),
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
     async findByIdAndUpdate<P extends MongoProjection | undefined = undefined>(
       id: IdType,
-      payload: UpdateQuery<T>,
+      payload: UpdateQuery<E>,
       options?: FindByIdAndUpdateOptions<P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
-      const doc = await this.findOneAndUpdate(
-        { _id: id } as FilterQuery<MongoDoc<T, IdType>>,
-        payload,
-        options,
-      );
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
+      const doc = await this.findOneAndUpdate({ _id: id } as FilterQuery<EDoc>, payload, options);
       if (!doc) {
         return null;
       }
@@ -192,7 +189,7 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
 
     async findByIdAndDelete<P extends MongoProjection | undefined = undefined>(
       id: IdType,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const deletedDoc = await this.model.findByIdAndDelete(id);
       if (!deletedDoc) {
         return null;
@@ -201,20 +198,20 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
     }
 
     findOneAndReplace<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      replacement?: T,
-      options?: FindOneAndReplaceOptions<T, P> & { new: true; upsert: true },
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+      filter?: FilterQuery<EDoc>,
+      replacement?: E,
+      options?: FindOneAndReplaceOptions<E, P> & { new: true; upsert: true },
+    ): Promise<DocOrProjectedDoc<EDoc, P>>;
     findOneAndReplace<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      replacement?: T,
-      options?: FindOneAndReplaceOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+      filter?: FilterQuery<EDoc>,
+      replacement?: E,
+      options?: FindOneAndReplaceOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
     async findOneAndReplace<P extends MongoProjection | undefined = undefined>(
-      filter?: FilterQuery<MongoDoc<T, IdType>>,
-      replacement?: T,
-      options?: FindOneAndReplaceOptions<T, P>,
-    ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null> {
+      filter?: FilterQuery<EDoc>,
+      replacement?: E,
+      options?: FindOneAndReplaceOptions<E, P>,
+    ): Promise<DocOrProjectedDoc<EDoc, P> | null> {
       const doc = await this.model.findOneAndReplace(filter, replacement, options);
       if (!doc) {
         return null;
@@ -222,27 +219,27 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
       return this.castToEntityInstance(doc.toObject());
     }
 
-    async insert(payload: Partial<T>): Promise<MongoDoc<T, IdType>> {
+    async insert(payload: Partial<E>): Promise<EDoc> {
       const doc = await this.model.create(payload);
       return this.castToEntityInstance(doc.toObject());
     }
 
-    async insertMany(payloads: Partial<T>[]): Promise<MongoDoc<T, IdType>[]> {
+    async insertMany(payloads: Partial<E>[]): Promise<EDoc[]> {
       const createdDocs = await this.model.insertMany(payloads);
       return createdDocs.map((doc) => this.castToEntityInstance(doc.toObject()));
     }
 
     async updateMany(
-      filter: FilterQuery<MongoDoc<T, IdType>>,
-      updateQuery: UpdateQuery<T>,
+      filter: FilterQuery<EDoc>,
+      updateQuery: UpdateQuery<E>,
       options?: UpdateManyOptions,
     ): Promise<UpdateResult> {
       return await this.model.updateMany(filter, updateQuery, options);
     }
 
     async updateOne(
-      filter: FilterQuery<MongoDoc<T, IdType>>,
-      updateQuery: UpdateQuery<T>,
+      filter: FilterQuery<EDoc>,
+      updateQuery: UpdateQuery<E>,
       options?: UpdateOneOptions,
     ): Promise<UpdateResult> {
       return await this.model.updateOne(filter, updateQuery, options);
@@ -250,14 +247,10 @@ export function BuildMongestService<T extends EntityPayload, IdType = ObjectId>(
 
     async updateById(
       id: IdType,
-      updateQuery: UpdateQuery<T>,
+      updateQuery: UpdateQuery<E>,
       options?: UpdateOneOptions,
     ): Promise<UpdateResult> {
-      const res = await this.updateOne(
-        { _id: id } as FilterQuery<MongoDoc<T, IdType>>,
-        updateQuery,
-        options,
-      );
+      const res = await this.updateOne({ _id: id } as FilterQuery<EDoc>, updateQuery, options);
       return res;
     }
 

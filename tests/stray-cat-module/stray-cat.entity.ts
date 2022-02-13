@@ -6,6 +6,9 @@ import { Cat } from '../cat-module/cat.entity';
 export class StrayCat extends Cat {
   @Prop({ required: true, type: Number })
   territorySize!: number;
+
+  @Prop({ required: false, type: Number })
+  enemyCount?: number;
 }
 
 export const StrayCatSchema = SchemaFactory.createForClass(StrayCat);

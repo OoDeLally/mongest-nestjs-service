@@ -36,12 +36,11 @@ Now you can create your entity and your service:
 
 @Schema()
 export class Cat {
+  _id!: ObjectId;
+
   @Prop({ required: true, type: String })
   name!: string;
 }
-
-export type CatDoc = MongoDoc<Cat>;
-
 
 @Injectable()
 export class CatsService extends BuildMongestService(Cat) {}
@@ -55,7 +54,7 @@ export class CatsService extends BuildMongestService(Cat) {
     // dont forget to explicitely inject the model to super().
     super(model);
   }
-  async myCustomMethod(): Promise<CatDoc[]> {
+  async myCustomMethod(): Promise<Cat[]> {
     return await this.find({ name: 'pogo' });
   }
 }

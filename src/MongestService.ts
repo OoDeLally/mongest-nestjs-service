@@ -1,8 +1,8 @@
-import { ObjectId, UpdateResult } from 'mongodb';
+import { UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
 import { SortObject } from './pagination';
 import { MongoProjection, Projected } from './projection';
-import { EntityPayload, MongoDoc } from './types';
+import { EntityPayload, ExtractIdType, OmitId } from './types';
 
 export type CountDocumentsOptions = {
   skip?: number;
@@ -17,7 +17,7 @@ export type FindOptions<T extends EntityPayload, P extends MongoProjection | und
 };
 
 export type DocOrProjectedDoc<
-  EntityDoc extends MongoDoc<EntityPayload, unknown>,
+  EntityDoc extends EntityPayload,
   P extends MongoProjection | undefined,
 > = P extends MongoProjection ? Projected<EntityDoc, P> : EntityDoc;
 
@@ -74,108 +74,102 @@ export type FindByIdAndUpdateOptions<P extends MongoProjection | undefined> = {
 
 export type DeleteResult = { deletedCount: number };
 
-export interface MongestService<T extends EntityPayload, IdType = ObjectId> {
-  model: Model<T>;
+export interface MongestService<EDoc extends EntityPayload> {
+  model: Model<EDoc>;
 
   aggregate<ResultDoc extends object | unknown = unknown>(
     pipeline: PipelineStage[],
   ): Promise<ResultDoc[]>;
 
-  countDocuments(
-    filter?: FilterQuery<MongoDoc<T, IdType>>,
-    options?: CountDocumentsOptions,
-  ): Promise<number>;
+  countDocuments(filter?: FilterQuery<EDoc>, options?: CountDocumentsOptions): Promise<number>;
 
-  deleteMany(
-    filter?: FilterQuery<MongoDoc<T, IdType>>,
-    options?: DeleteManyOptions,
-  ): Promise<DeleteResult>;
+  deleteMany(filter?: FilterQuery<EDoc>, options?: DeleteManyOptions): Promise<DeleteResult>;
 
-  deleteOne(filter?: FilterQuery<MongoDoc<T, IdType>>): Promise<DeleteResult>;
+  deleteOne(filter?: FilterQuery<EDoc>): Promise<DeleteResult>;
 
-  deleteById(id: IdType): Promise<DeleteResult>;
+  deleteById(id: ExtractIdType<EDoc>): Promise<DeleteResult>;
 
   find<P extends MongoProjection | undefined = undefined>(
-    filter?: FilterQuery<MongoDoc<T, IdType>>,
-    options?: FindOptions<T, P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>[]>;
+    filter?: FilterQuery<EDoc>,
+    options?: FindOptions<EDoc, P>,
+  ): Promise<DocOrProjectedDoc<EDoc, P>[]>;
 
   findOne<P extends MongoProjection | undefined = undefined>(
-    filter?: FilterQuery<MongoDoc<T, IdType>>,
-    options?: FindOneOptions<T, P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    filter?: FilterQuery<EDoc>,
+    options?: FindOneOptions<EDoc, P>,
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findOneAndUpdate<P extends MongoProjection | undefined = undefined>(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    payload: UpdateQuery<T>,
-    options: FindOneAndUpdateOptions<T, P> & { new: true; upsert: true },
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+    filter: FilterQuery<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
+    options: FindOneAndUpdateOptions<EDoc, P> & { new: true; upsert: true },
+  ): Promise<DocOrProjectedDoc<EDoc, P>>;
   findOneAndUpdate<P extends MongoProjection | undefined = undefined>(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    payload: UpdateQuery<T>,
-    options?: FindOneAndUpdateOptions<T, P> & ({ new?: false } | { upsert?: false }),
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    filter: FilterQuery<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
+    options?: FindOneAndUpdateOptions<EDoc, P> & ({ new?: false } | { upsert?: false }),
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findById<P extends MongoProjection | undefined = undefined>(
-    id: IdType,
+    id: ExtractIdType<EDoc>,
     options?: FindByIdOptions<P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findByIdOrThrow<P extends MongoProjection | undefined = undefined>(
-    id: IdType,
+    id: ExtractIdType<EDoc>,
     options?: FindByIdOptions<P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+  ): Promise<DocOrProjectedDoc<EDoc, P>>;
 
   findByIdAndUpdate<P extends MongoProjection | undefined = undefined>(
-    id: IdType,
-    payload: UpdateQuery<T>,
+    id: ExtractIdType<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
     options: FindByIdAndUpdateOptions<P> & { new: true; upsert: true },
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+  ): Promise<DocOrProjectedDoc<EDoc, P>>;
   findByIdAndUpdate<P extends MongoProjection | undefined = undefined>(
-    id: IdType,
-    payload: UpdateQuery<T>,
+    id: ExtractIdType<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
     options?: FindByIdAndUpdateOptions<P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findByIdAndDelete<P extends MongoProjection | undefined = undefined>(
-    id: IdType,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    id: ExtractIdType<EDoc>,
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findOneAndDelete<P extends MongoProjection | undefined = undefined>(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    options?: FindOneAndDeleteOptions<T, P>,
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    filter: FilterQuery<EDoc>,
+    options?: FindOneAndDeleteOptions<EDoc, P>,
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
   findOneAndReplace<P extends MongoProjection | undefined = undefined>(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    replacement: T,
-    options: FindOneAndReplaceOptions<T, P> & { new: true; upsert: true },
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P>>;
+    filter: FilterQuery<EDoc>,
+    replacement: OmitId<EDoc>,
+    options: FindOneAndReplaceOptions<EDoc, P> & { new: true; upsert: true },
+  ): Promise<DocOrProjectedDoc<EDoc, P>>;
   findOneAndReplace<P extends MongoProjection | undefined = undefined>(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    replacement: T,
-    options?: FindOneAndReplaceOptions<T, P> & ({ new?: false } | { upsert?: false }),
-  ): Promise<DocOrProjectedDoc<MongoDoc<T, IdType>, P> | null>;
+    filter: FilterQuery<EDoc>,
+    replacement: OmitId<EDoc>,
+    options?: FindOneAndReplaceOptions<EDoc, P> & ({ new?: false } | { upsert?: false }),
+  ): Promise<DocOrProjectedDoc<EDoc, P> | null>;
 
-  insert(payload: Partial<T>): Promise<MongoDoc<T, IdType>>;
+  insert(payload: Partial<EDoc>): Promise<EDoc>;
 
-  insertMany(payloads: Partial<T>[]): Promise<MongoDoc<T, IdType>[]>;
+  insertMany(payloads: Partial<EDoc>[]): Promise<EDoc[]>;
 
   updateMany(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    payload: UpdateQuery<T>,
+    filter: FilterQuery<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
     options?: UpdateManyOptions,
   ): Promise<UpdateResult>;
 
   updateOne(
-    filter: FilterQuery<MongoDoc<T, IdType>>,
-    payload: UpdateQuery<T>,
+    filter: FilterQuery<EDoc>,
+    payload: UpdateQuery<OmitId<EDoc>>,
     options?: UpdateOneOptions,
   ): Promise<UpdateResult>;
 
   updateById(
-    id: IdType,
-    updateQuery: UpdateQuery<T>,
+    id: ExtractIdType<EDoc>,
+    updateQuery: UpdateQuery<OmitId<EDoc>>,
     options?: UpdateOneOptions,
   ): Promise<UpdateResult>;
 }

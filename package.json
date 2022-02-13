@@ -1,6 +1,6 @@
 {
   "name": "mongest-service",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Delightfully-typed Mongoose-wrapper NestJS-service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -54,6 +54,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "supertest": "^6.1.6",
     "ts-mocha": "^8.0.0",
+    "tsd": "^0.19.1",
     "typescript": "^4.5.2"
   },
   "peerDependencies": {

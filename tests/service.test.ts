@@ -84,6 +84,12 @@ describe('CatsService', () => {
     expect(firstCat).to.be.instanceOf(StrayCat);
     if (isEntityInstanceOf(firstCat, StrayCat)) {
       expect(firstCat.territorySize).equal(pogoCat.territorySize);
+      // @ts-expect-error kind is not projected
+      firstCat.kind;
+      // @ts-expect-error enemyCount is not projected
+      firstCat.enemyCount;
+      // @ts-expect-error humanSlave should be unknown
+      const _humanSlave: string = firstCat.humanSlave;
     }
     expect(firstCat?.name).to.equal(pogoCat.name);
     expect(firstCat).to.have.haveOwnProperty('_id');

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 
 export enum CatKind {
   StrayCat = 'StrayCat',
@@ -7,6 +8,8 @@ export enum CatKind {
 
 @Schema({ discriminatorKey: 'kind' })
 export class Cat {
+  _id!: ObjectId;
+
   kind!: CatKind;
 
   @Prop({ required: true, type: String })
