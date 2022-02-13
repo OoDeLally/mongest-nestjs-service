@@ -4,7 +4,7 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ObjectId } from 'mongodb';
 import { Document as MongooseDocument } from 'mongoose';
-import { isEntityInstanceOf } from 'src/polymorphism';
+import { isEntityInstanceOf } from '../src/polymorphism';
 import { ortieCat, pogoCat, safiCat, silverCat } from './cat-module/cat-test-data';
 import { CatModule } from './cat-module/cat.module';
 import { CatsService } from './cat-module/cat.service';

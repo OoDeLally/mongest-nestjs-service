@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { ObjectId } from 'mongodb';
-import { IsWhitelistProjection, MongoProjection, Projected } from 'src/projection';
 import { expectType } from 'tsd';
+import { IsWhitelistProjection, MongoProjection, Projected } from '../src/projection';
 
 const acceptProjection = <Proj extends MongoProjection>(_proj: Proj) => {
   // do nothin'

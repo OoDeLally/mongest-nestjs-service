@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { registerEntityClassForSchema } from 'src/registerEntityClassForSchema';
 import { Cat } from 'tests/cat-module/cat.entity';
+import { registerEntityClassForSchema } from '../../src/registerEntityClassForSchema';
 
 @Schema()
 export class HomeCat extends Cat {

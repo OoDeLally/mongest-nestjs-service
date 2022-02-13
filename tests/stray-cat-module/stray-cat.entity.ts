@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { registerEntityClassForSchema } from 'src/registerEntityClassForSchema';
+import { registerEntityClassForSchema } from '../../src/registerEntityClassForSchema';
 import { Cat } from '../cat-module/cat.entity';
 
 @Schema()

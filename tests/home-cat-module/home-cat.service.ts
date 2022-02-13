@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BuildMongestService } from 'src/BuildMongestService';
+import { BuildMongestService } from '../../src/BuildMongestService';
 import { HomeCat } from './home-cat.entity';
 
 @Injectable()

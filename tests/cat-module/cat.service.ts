@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BuildMongestService } from 'src/BuildMongestService';
+import { BuildMongestService } from '../../src/BuildMongestService';
 import { Cat } from './cat.entity';
 
 @Injectable()
