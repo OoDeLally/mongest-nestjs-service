@@ -49,7 +49,33 @@ export type NeverIfFalsyId<Key, P extends MongoProjection> = Key extends '_id'
 
 type EntityIdOrDefault<E extends EntityPayload> = '_id' extends keyof E ? E['_id'] : ObjectId;
 
+type AddOrRemoveIdFromWhiteProjection<
+  Keys extends string,
+  P extends MongoProjection,
+> = P['_id'] extends false ? Exclude<Keys, '_id'> : Keys | '_id';
+
+type AddOrRemoveIdFromBlackProjection<
+  Keys extends string,
+  P extends MongoProjection,
+> = P['_id'] extends false ? Keys | '_id' : Exclude<Keys, '_id'>;
+
 export type Projected<
+  EntityDoc extends EntityPayload,
+  P extends MongoProjection,
+> = IsEmptyObject<P> extends true
+  ? EntityDoc // e.g. {}
+  : IsWhitelistProjection<P> extends never
+  ? never // invalid projection e.g. {a: true, b: false}
+  : IsWhitelistProjection<P> extends true
+  ? Pick<
+      EntityDoc,
+      keyof EntityDoc & AddOrRemoveIdFromWhiteProjection<string & keyof EntityDoc & keyof P, P>
+    > & {
+      [Key in Exclude<keyof P, keyof EntityDoc>]: unknown;
+    }
+  : Omit<EntityDoc, AddOrRemoveIdFromBlackProjection<string & keyof P, P>>;
+
+export type Projected1<
   EntityDoc extends EntityPayload,
   P extends MongoProjection,
 > = IsEmptyObject<P> extends true
