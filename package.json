@@ -1,6 +1,6 @@
 {
   "name": "mongest-service",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Delightfully-typed Mongoose-wrapper NestJS-service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
