@@ -6,7 +6,6 @@ import { ObjectId } from 'mongodb';
 import { Document as MongooseDocument } from 'mongoose';
 import { isEntityInstanceOf } from '../src/polymorphism';
 import { ortieCat, pogoCat, safiCat, silverCat } from './cat-module/cat-test-data';
-import { Cat } from './cat-module/cat.entity';
 import { CatModule } from './cat-module/cat.module';
 import { CatsService } from './cat-module/cat.service';
 import { databaseModule, MongodInstance } from './database.module';
@@ -98,9 +97,7 @@ describe('CatsService', () => {
     const secondCat = projectedCats[1]!;
     expect(secondCat.name).to.equal(silverCat.name);
     expect(secondCat).to.be.instanceOf(HomeCat);
-    if (
-      isEntityInstanceOf<Cat, keyof typeof secondCat, typeof secondCat, HomeCat>(secondCat, HomeCat)
-    ) {
+    if (isEntityInstanceOf(secondCat, HomeCat)) {
       expect(secondCat.humanSlave).equal(silverCat.humanSlave);
     }
   });
