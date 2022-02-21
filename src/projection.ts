@@ -57,8 +57,7 @@ type AddOrRemoveIdFromBlackProjection<
   P extends MongoProjection,
 > = P['_id'] extends false ? Keys | '_id' : Exclude<Keys, '_id'>;
 
-// Use `' _wlp': never` as a white-list projection flag.
-// We use a non-secable space on purpose so any IDE would show this field after the normal fields.
+// Use `' _wlp': never` as a white-list projection flag, so it doesnt get shown by IDEs.
 
 export type Projected<
   EntityDoc extends EntityPayload,
