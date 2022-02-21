@@ -13,7 +13,7 @@ export function isEntityInstanceOf<
 >(
   doc: PickedDoc,
   classRef: Type<OtherClass>,
-): doc is ' _wlp' extends keyof PickedDoc
+): doc is ' _wlp' extends keyof PickedDoc
   ? Pick<PickedDoc & OtherClass, keyof PickedDoc>
   : OtherClass extends PickedDoc
   ? OtherClass

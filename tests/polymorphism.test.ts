@@ -7,6 +7,7 @@ class Mother {
   b!: string;
   a!: string;
   c!: string;
+  j!: string;
 }
 
 class Child extends Mother {
@@ -20,7 +21,7 @@ if (isEntityInstanceOf<Mother, Child>(mother, Child)) {
   expectType<Mother & Child>(mother);
 }
 
-const motherWhiteList = {} as Pick<Mother, 'a' | 'b'> & { ' _wlp': never; h: unknown };
+const motherWhiteList = {} as Pick<Mother, 'a' | 'b'> & { ' _wlp': never; h: unknown };
 
 if (isEntityInstanceOf(motherWhiteList, Child)) {
   expectType<{ a: string; b: string; h: unknown }>(motherWhiteList);

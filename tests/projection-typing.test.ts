@@ -5,6 +5,8 @@ import { ObjectId } from 'mongodb';
 import { expectType } from 'tsd';
 import { IsWhitelistProjection, MongoProjection, Projected } from '../src/projection';
 
+const WLP_MARKER = ' _wlp' as const;
+
 const acceptProjection = <Proj extends MongoProjection>(_proj: Proj) => {
   // do nothin'
 };
@@ -49,6 +51,7 @@ expectType<Projected<Foo, { _id: false }>>({
 
 expectType<Projected<Foo, { _id: true }>>({
   _id: new ObjectId(),
+  [WLP_MARKER]: null as never,
 });
 
 expectType<Projected<Foo, { a: 0; _id: true }>>({
@@ -60,15 +63,18 @@ expectType<Projected<Foo, { a: 0; _id: true }>>({
 expectType<Projected<Foo, { a: 1 }>>({
   _id: new ObjectId(),
   a: 42,
+  [WLP_MARKER]: null as never,
 });
 
 expectType<Projected<Foo, { a: 1; _id: true }>>({
   _id: new ObjectId(),
   a: 42,
+  [WLP_MARKER]: null as never,
 });
 
 expectType<Projected<Foo, { a: 1; _id: false }>>({
   a: 42,
+  [WLP_MARKER]: null as never,
 });
 
 expectType<Projected<Foo, { a: 0 }>>({
@@ -96,6 +102,7 @@ expectType<Projected<Foo, { a: 1; extra: 1 }>>({
   _id: ObjectId;
   a: number;
   extra: unknown;
+  [WLP_MARKER]: never;
 });
 
 expectType<Projected<Foo, { a: 0; extra: 0 }>>({

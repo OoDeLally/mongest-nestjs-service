@@ -57,8 +57,7 @@ type AddOrRemoveIdFromBlackProjection<
   P extends MongoProjection,
 > = P['_id'] extends false ? Keys | '_id' : Exclude<Keys, '_id'>;
 
-// eslint-disable-next-line no-irregular-whitespace
-// Use `' _wlp': never` as a white-list projection flag.
+// Use `' _wlp': never` as a white-list projection flag.
 // We use a non-secable space on purpose so any IDE would show this field after the normal fields.
 
 export type Projected<
@@ -73,6 +72,6 @@ export type Projected<
       EntityDoc,
       keyof EntityDoc & AddOrRemoveIdFromWhiteProjection<string & keyof EntityDoc & keyof P, P>
     > & {
-      [Key in Exclude<keyof P, keyof EntityDoc> | ' _wlp']: Key extends ' _wlp' ? never : unknown;
+      [Key in Exclude<keyof P, keyof EntityDoc> | ' _wlp']: Key extends ' _wlp' ? never : unknown;
     }
   : Omit<EntityDoc, AddOrRemoveIdFromBlackProjection<string & keyof P, P>>;
