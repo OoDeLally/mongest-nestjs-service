@@ -1,4 +1,8 @@
-import { GetEntityValueTypeOrUnknown, PickAndUnwrapIfMatchRootKey } from './projection-helpers';
+import {
+  GetEntityValueTypeOrUnknown,
+  PickAndUnwrapIfMatchRootKey,
+  RemovePositionalMarker,
+} from './projection-helpers';
 import { ResolveProjectionReference } from './resolve-projection-reference';
 import {
   EntityPayload,
@@ -7,8 +11,6 @@ import {
   MongoProjectionElemMatch,
   MongoProjectionSlice,
 } from './types';
-
-// Known limitations: No $operator in projection.
 
 type GetRootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
 
@@ -71,7 +73,7 @@ export type InclusionProjected<
   P extends MongoProjection,
 > = InclusionProjectedRec<
   D,
-  SubstituteElemMatchOperator<SubstituteSliceOperator<P>>,
+  RemovePositionalMarker<SubstituteElemMatchOperator<SubstituteSliceOperator<P>>>,
   ResolveProjectionReference<D, P>, // Resolve in advance all "$referenced.values".
   true
 >;

@@ -1,3 +1,4 @@
+import { RemovePositionalMarker } from './projection-helpers';
 import {
   EntityPayload,
   Falsy,
@@ -39,5 +40,5 @@ type _IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> extend
   : true; // {a: 1, b: 'foo'}
 
 export type IsInclusionProjection<P extends MongoProjection> = _IsInclusionProjection<
-  OmitOperators<P>
+  RemovePositionalMarker<OmitOperators<P>>
 >;

@@ -613,3 +613,27 @@ type Proj25Expected = {
 };
 expectType<Proj25>({} as Proj25Expected);
 expectType<Proj25Expected>({} as Proj25);
+
+type Proj26 = Projected<
+  Foo,
+  {
+    a: 1;
+    'd.$': 1;
+  }
+>;
+
+type Proj26Expected = {
+  _id: ObjectId;
+  a: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+  ' _ip': never;
+};
+expectType<Proj26>({} as Proj26Expected);
+expectType<Proj26Expected>({} as Proj26);

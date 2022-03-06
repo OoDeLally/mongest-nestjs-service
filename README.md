@@ -90,6 +90,7 @@ Mongoose return typing is often too constraining for no apparent good reason. It
 Mongest service documents are always **lean** instances of the entity class (except `aggregate()` method).
 
 In addition, when a projection is used, the return type automatically excludes the non-projected fields, so that you will encounter a typing error if you try to use them by mistake.
+Projected typing supports local field reference (`{foo: '$bar'}`), string substitution (`{foo: 'bar'}`), and operators `$`, `$slice`, `$elemMatch`.
 
 ```ts
 const cat = await catService.findOne({ name: /pogo/i }, { projection: { name: 1 } });
@@ -176,7 +177,6 @@ Note that it would still work with the vanilla `if (cat instanceof StrayCat)`, b
 
 ## Limitations
 
-  * So far, only basic and nested mongo projections are supported (e.g. `{foo: true, 'bar.baz': true}`). Projection operators are not supported.
   * Because lean documents are used systematically, things like virtual fields or `populate()` are not directly possible.
     Of course if you *really* need one of these fancy mongoose features, you can always invoke the model's methods directly (e.g. `service.model.findOne().populate('myRefField').exec()`).
 
