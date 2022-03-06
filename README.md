@@ -176,7 +176,7 @@ Note that it would still work with the vanilla `if (cat instanceof StrayCat)`, b
 
 ## Limitations
 
-  * So far, only basic mongo projections are supported (e.g. `{foo: true, bar: true}`). More complex projections including specific logic are not.
+  * So far, only basic and nested mongo projections are supported (e.g. `{foo: true, 'bar.baz': true}`). Projection operators are not supported.
   * Because lean documents are used systematically, things like virtual fields or `populate()` are not directly possible.
     Of course if you *really* need one of these fancy mongoose features, you can always invoke the model's methods directly (e.g. `service.model.findOne().populate('myRefField').exec()`).
 
