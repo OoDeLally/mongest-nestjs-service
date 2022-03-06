@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { EntityPayload } from './types';
+import { EntityPayload, MongoPrimitiveObject } from './types';
 
 // Known limitations:
 // Mongo's projection has much more features than just deciding whether we include a given field or not.
@@ -55,22 +55,6 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
   ? false // Exclusion projection e.g. {a: 0, b: false}
   : true; // {a: 1, b: 'foo'}
 
-type Yo = IsInclusionProjection<{ a: 1; 'd.f.g': 0 }>;
-
-type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
-  (IdSpecialTreatment extends true
-    ? Exclude<P['_id'], Falsy> extends never
-      ? Exclude<keyof P, '_id'>
-      : keyof P | '_id'
-    : keyof P);
-
-type GetExclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
-  (IdSpecialTreatment extends true
-    ? Exclude<P['_id'], Falsy> extends never
-      ? keyof P | '_id'
-      : Exclude<keyof P, '_id'>
-    : keyof P);
-
 type RootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
 
 // type Foo1 = RootKey<'foo.bar'>;
@@ -90,11 +74,18 @@ type Foo = {
   };
 };
 
-type FooProj = { a: 1; 'd.f.g': 1 };
-
 type GetEntityValueTypeOrUnknown<D extends EntityPayload, K extends string> = K extends keyof D
   ? D[K]
   : unknown;
+
+type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
+  (IdSpecialTreatment extends true
+    ? Exclude<P['_id'], Falsy> extends never
+      ? Exclude<keyof P, '_id'>
+      : keyof P | '_id'
+    : keyof P);
+
+// Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
 type InclusiveProjected<
   D extends EntityPayload,
@@ -106,22 +97,55 @@ type InclusiveProjected<
     | GetInclusiveProjectedKeys<P, IsRootProjection> as RootKey<Key>]: Key extends ' _ip'
     ? never
     : Key extends `${infer RootKey}.${infer ChildKey}`
-    ? GetEntityValueTypeOrUnknown<D, RootKey> extends object
+    ? GetEntityValueTypeOrUnknown<D, RootKey> extends MongoPrimitiveObject
+      ? never
+      : GetEntityValueTypeOrUnknown<D, RootKey> extends object // Embedded object
       ? InclusiveProjected<GetEntityValueTypeOrUnknown<D, RootKey>, { [key in ChildKey]: P[Key] }>
       : unknown
     : GetEntityValueTypeOrUnknown<D, Key>;
 };
 
-// Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
+type ExtractRootKeys<Key extends string> = Key extends `${string}.${string}` ? never : Key;
+
+type GetExclusiveProjectedKeys<
+  D extends EntityPayload,
+  P extends MongoProjection,
+  IdSpecialTreatment = false,
+> = string &
+  (IdSpecialTreatment extends true
+    ? Exclude<P['_id'], Falsy> extends never // _id is Falsy
+      ? Exclude<keyof D, '_id' | keyof P>
+      : Exclude<keyof D, keyof P> | '_id'
+    : Exclude<keyof D, keyof P>);
+
+type FooProj = { a: 0; 'd.f.g': 0 };
+
+type PickAndUnwrapIfMatchRootKey<Proj extends MongoProjection, RootKey extends string> = {
+  [Key in keyof Proj as Key extends `${RootKey}.${infer ChildKey}` ? ChildKey : never]: Proj[Key];
+};
+
+type ExclusiveProjected<
+  D extends EntityPayload,
+  P extends MongoProjection,
+  IsRootProjection = false,
+> = {
+  [Key in GetExclusiveProjectedKeys<D, P, IsRootProjection>]: GetEntityValueTypeOrUnknown<
+    D,
+    Key
+  > extends MongoPrimitiveObject
+    ? GetEntityValueTypeOrUnknown<D, Key>
+    : GetEntityValueTypeOrUnknown<D, Key> extends object
+    ? ExclusiveProjected<GetEntityValueTypeOrUnknown<D, Key>, PickAndUnwrapIfMatchRootKey<P, Key>>
+    : GetEntityValueTypeOrUnknown<D, Key>;
+};
 
 export type Projected<
   D extends EntityPayload,
   P extends MongoProjection,
 > = IsInclusionProjection<P> extends never
-  ? never // invalid projection e.g. {a: true, b: false}
+  ? never // invalid projection e.g. {a: 1, b: 0}
   : IsInclusionProjection<P> extends true
   ? InclusiveProjected<D, P, true>
   : IsInclusionProjection<P> extends false
-  ? // Exclusive projection
-    Omit<D, GetExclusiveProjectedKeys<P>>
-  : never; // invalid projection
+  ? ExclusiveProjected<D, P, true>
+  : never; // invalid projection (not sure whether that can happen)
