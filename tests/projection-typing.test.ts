@@ -29,174 +29,245 @@ type Foo = {
   }[];
 };
 
-expectType<Projected<Foo, {}>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj0 = Projected<Foo, {}>;
+type Proj0Expected = {
+  _id: ObjectId;
+  a: number;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj0>({} as Proj0Expected);
+expectType<Proj0Expected>({} as Proj0);
 
-expectType<Projected<Foo, { _id: false }>>(
-  {} as {
-    a: number;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj1 = Projected<
+  Foo,
+  {
+    _id: false;
+  }
+>;
+type Proj1Expected = {
+  a: number;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj1>({} as Proj1Expected);
+expectType<Proj1Expected>({} as Proj1);
 
-expectType<Projected<Foo, { _id: true }>>(
-  {} as {
-    _id: ObjectId;
-    ' _ip': never;
-  },
-);
+type Proj2 = Projected<
+  Foo,
+  {
+    _id: true;
+  }
+>;
+type Proj2Expected = {
+  _id: ObjectId;
+  ' _ip': never;
+};
+expectType<Proj2>({} as Proj2Expected);
+expectType<Proj2Expected>({} as Proj2);
 
-expectType<Projected<Foo, { a: 0; _id: true }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj3 = Projected<
+  Foo,
+  {
+    a: 0;
+    _id: true;
+  }
+>;
 
-expectType<Projected<Foo, { a: 1 }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    ' _ip': never;
-  },
-);
+type Proj3Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
 
-expectType<Projected<Foo, { a: 1; _id: true }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    ' _ip': never;
-  },
-);
+expectType<Proj3>({} as Proj3Expected);
+expectType<Proj3Expected>({} as Proj3);
 
-expectType<Projected<Foo, { a: 1; _id: false }>>(
-  {} as {
-    a: number;
-    ' _ip': never;
-  },
-);
+type Proj4 = Projected<
+  Foo,
+  {
+    a: 1;
+  }
+>;
+type Proj4Expected = {
+  _id: ObjectId;
+  a: number;
+  ' _ip': never;
+};
+expectType<Proj4>({} as Proj4Expected);
+expectType<Proj4Expected>({} as Proj4);
 
-expectType<Projected<Foo, { a: 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj5 = Projected<
+  Foo,
+  {
+    a: 1;
+    _id: true;
+  }
+>;
+type Proj5Expected = {
+  _id: ObjectId;
+  a: number;
+  ' _ip': never;
+};
+expectType<Proj5>({} as Proj5Expected);
+expectType<Proj5Expected>({} as Proj5);
 
-expectType<Projected<Foo, { a: 0; _id: true }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj6 = Projected<
+  Foo,
+  {
+    a: 1;
+    _id: false;
+  }
+>;
+type Proj6Expected = {
+  a: number;
+  ' _ip': never;
+};
+expectType<Proj6>({} as Proj6Expected);
+expectType<Proj6Expected>({} as Proj6);
 
-expectType<Projected<Foo, { a: 0; _id: false }>>(
-  {} as {
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj7 = Projected<
+  Foo,
+  {
+    a: 0;
+  }
+>;
+type Proj7Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj7>({} as Proj7Expected);
+expectType<Proj7Expected>({} as Proj7);
 
-expectType<Projected<Foo, { a: 1; extra: 1 }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    extra: unknown;
-    ' _ip': never;
-  },
-);
+type Proj8 = Projected<
+  Foo,
+  {
+    a: 0;
+    _id: true;
+  }
+>;
+type Proj8Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj8>({} as Proj8Expected);
+expectType<Proj8Expected>({} as Proj8);
 
-expectType<Projected<Foo, { a: 0; extra: 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        g: string;
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
+type Proj9 = Projected<
+  Foo,
+  {
+    a: 0;
+    _id: false;
+  }
+>;
+type Proj9Expected = {
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj9>({} as Proj9Expected);
+expectType<Proj9Expected>({} as Proj9);
+
+type Proj10 = Projected<
+  Foo,
+  {
+    a: 1;
+    extra: 1;
+  }
+>;
+type Proj10Expected = {
+  _id: ObjectId;
+  a: number;
+  extra: unknown;
+  ' _ip': never;
+};
+expectType<Proj10>({} as Proj10Expected);
+expectType<Proj10Expected>({} as Proj10);
+
+type Proj11 = Projected<
+  Foo,
+  {
+    a: 0;
+    extra: 0;
+  }
+>;
+type Proj11Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj11>({} as Proj11Expected);
+expectType<Proj11Expected>({} as Proj11);
 
 /** Nested fields */
 
 /** Nested inclusion projection */
-expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    d: {
-      f: {
-        g: string;
-      };
-    }[];
-    ' _ip': never;
-  },
-);
+type Proj12 = Projected<
+  Foo,
+  {
+    a: 1;
+    'd.f.g': 1;
+  }
+>;
 
-expectType<{
+type Proj12Expected = {
   _id: ObjectId;
   a: number;
   d: {
@@ -205,23 +276,19 @@ expectType<{
     };
   }[];
   ' _ip': never;
-}>({} as Projected<Foo, { a: 1; 'd.f.g': 1 }>);
+};
+expectType<Proj12>({} as Proj12Expected);
+expectType<Proj12Expected>({} as Proj12);
 
-expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    d: {
-      f: {
-        g: string;
-        i: Date;
-      };
-    }[];
-    ' _ip': never;
-  },
-);
-
-expectType<{
+type Proj13 = Projected<
+  Foo,
+  {
+    a: 1;
+    'd.f.g': 1;
+    'd.f.i': 1;
+  }
+>;
+type Proj13Expected = {
   _id: ObjectId;
   a: number;
   d: {
@@ -231,26 +298,20 @@ expectType<{
     };
   }[];
   ' _ip': never;
-}>({} as Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1; 'd.e': 1 }>);
+};
+expectType<Proj13>({} as Proj13Expected);
+expectType<Proj13Expected>({} as Proj13);
 
 /** Nested exclusion projection */
 
-expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
-
-expectType<{
+type Proj14 = Projected<
+  Foo,
+  {
+    a: 0;
+    'd.f.g': 0;
+  }
+>;
+type Proj14Expected = {
   _id: ObjectId;
   b: string;
   c: number;
@@ -261,46 +322,39 @@ expectType<{
       i: Date;
     };
   }[];
-}>({} as Projected<Foo, { a: 0; 'd.f.g': 0 }>);
+};
+expectType<Proj14>({} as Proj14Expected);
+expectType<Proj14Expected>({} as Proj14);
 
 /** Unecessary projection */
-expectType<Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        h: string;
-        i: Date;
-      };
-    }[];
-  },
-);
 
-expectType<{
+type Proj15 = Projected<
+  Foo,
+  {
+    a: 0;
+    d: 0;
+    'd.f.g': 0;
+  }
+>;
+type Proj15Expected = {
   _id: ObjectId;
   b: string;
   c: number;
-}>({} as Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>);
+};
+expectType<Proj15>({} as Proj15Expected);
+expectType<Proj15Expected>({} as Proj15);
 
 /** Multiple projection with shared path prefix */
-expectType<Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        h: string;
-      };
-    }[];
-  },
-);
+type Proj16 = Projected<
+  Foo,
+  {
+    a: 0;
+    'd.f.g': 0;
+    'd.f.i': 0;
+  }
+>;
 
-expectType<{
+type Proj16Expected = {
   _id: ObjectId;
   b: string;
   c: number;
@@ -310,24 +364,21 @@ expectType<{
       h: string;
     };
   }[];
-}>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
+};
+expectType<Proj16>({} as Proj16Expected);
+expectType<Proj16Expected>({} as Proj16);
 
 /** Multiple projection with shared path prefix */
-expectType<Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>>(
-  {} as {
-    _id: ObjectId;
-    b: string;
-    c: number;
-    d: {
-      e: string;
-      f: {
-        h: string;
-      };
-    }[];
-  },
-);
 
-expectType<{
+type Proj17 = Projected<
+  Foo,
+  {
+    a: 0;
+    'd.f.g': 0;
+    'd.f.i': 0;
+  }
+>;
+type Proj17Expected = {
   _id: ObjectId;
   b: string;
   c: number;
@@ -337,75 +388,58 @@ expectType<{
       h: string;
     };
   }[];
-}>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
+};
+expectType<Proj17>({} as Proj17Expected);
+expectType<Proj17Expected>({} as Proj17);
 
 /** Inclusion projection with string value */
 
-expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.foo': 'yay' }>>(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    d: {
-      f: {
-        foo: 'yay';
-        g: string;
-      };
-    }[];
-    ' _ip': never;
-  },
-);
-
-expectType<{
+type Proj18 = Projected<
+  Foo,
+  {
+    a: 1;
+    'd.f.g': 1;
+    'd.f.foo': 'yay';
+  }
+>;
+type Proj18Expected = {
   _id: ObjectId;
   a: number;
   d: {
     f: {
-      extraString: 'yay';
+      foo: 'yay';
       g: string;
     };
   }[];
   ' _ip': never;
-}>(
-  {} as Projected<
-    Foo,
-    {
-      a: 1;
-      'd.f.g': 1;
-      'd.f.extraString': 'yay';
-    }
-  >,
-);
+};
+expectType<Proj18>({} as Proj18Expected);
+expectType<Proj18Expected>({} as Proj18);
 
 /** Exclusion projection with string value */
 
 // Direct value in an exclusion projection is forbidden.
-expectType<Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>>({} as never);
-expectType<never>({} as Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>);
+type Proj19 = Projected<
+  Foo,
+  {
+    a: 0;
+    'd.f.foo': 'yay';
+  }
+>;
+type Proj19Expected = never;
+expectType<Proj19>({} as Proj19Expected);
+expectType<Proj19Expected>({} as Proj19);
 
 /** Field reference */
 
-expectType<
-  Projected<
-    Foo,
-    {
-      a: 1;
-      'd.f.g': '$d.f.i';
-    }
-  >
->(
-  {} as {
-    _id: ObjectId;
-    a: number;
-    d: {
-      f: {
-        g: Date;
-      };
-    }[];
-    ' _ip': never;
-  },
-);
-
-expectType<{
+type Proj20 = Projected<
+  Foo,
+  {
+    a: 1;
+    'd.f.g': '$d.f.i';
+  }
+>;
+type Proj20Expected = {
   _id: ObjectId;
   a: number;
   d: {
@@ -414,4 +448,6 @@ expectType<{
     };
   }[];
   ' _ip': never;
-}>({} as Projected<Foo, { a: 1; 'd.f.g': '$d.f.i' }>);
+};
+expectType<Proj20>({} as Proj20Expected);
+expectType<Proj20Expected>({} as Proj20);
