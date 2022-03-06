@@ -3,9 +3,9 @@
 
 import { ObjectId } from 'mongodb';
 import { expectType } from 'tsd';
-import { IsWhitelistProjection, MongoProjection, Projected } from '../src/projection';
+import { IsInclusionProjection, MongoProjection, Projected } from '../src/projection';
 
-const WLP_MARKER = ' _wlp' as const;
+const WLP_MARKER = ' _ip' as const;
 
 const acceptProjection = <Proj extends MongoProjection>(_proj: Proj) => {
   // do nothin'
@@ -14,20 +14,20 @@ const acceptProjection = <Proj extends MongoProjection>(_proj: Proj) => {
 // @ts-expect-error invalid projection
 expectType<MongoProjection>({ valid: 0, invalid: 42 });
 
-// @ts-expect-error cannot be at the same time white and black list.
+// @ts-expect-error cannot be at the same time inclusion and exclusion projection.
 acceptProjection({ a: 1, extra: 0 });
 // @ts-expect-error cannot use a widden type
 acceptProjection<{ a: 1; extra: number }>({ a: 1, extra: 1 });
 // Can use a specified type
 acceptProjection<{ a: 1; extra: 1 }>({ a: 1, extra: 1 });
 
-expectType<IsWhitelistProjection<{ extraA: 1; extraB: 1 }>>(true);
+expectType<IsInclusionProjection<{ extraA: 1; extraB: 1 }>>(true);
 
-expectType<IsWhitelistProjection<{ extraA: 0; extraB: 0 }>>(false);
+expectType<IsInclusionProjection<{ extraA: 0; extraB: 0 }>>(false);
 
-expectType<IsWhitelistProjection<{ _id: true }>>(true);
+expectType<IsInclusionProjection<{ _id: true }>>(true);
 
-expectType<IsWhitelistProjection<{ _id: false }>>(false);
+expectType<IsInclusionProjection<{ _id: false }>>(false);
 
 type Foo = {
   _id: ObjectId;

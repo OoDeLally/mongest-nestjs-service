@@ -27,7 +27,7 @@ type OmitId<P extends Record<string, unknown>> = {
   [Key in keyof P]: Key extends '_id' ? never : P[Key];
 };
 
-export type IsWhitelistProjection<P extends MongoProjection> = IsEmptyObject<P> extends true
+export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> extends true
   ? false // e.g. {}
   : RecordAggregatedValues<OmitId<P>> extends never
   ? P['_id'] extends Truthy
@@ -36,9 +36,9 @@ export type IsWhitelistProjection<P extends MongoProjection> = IsEmptyObject<P> 
     ? false // e.g. {_id: false}
     : never // invalid projection e.g. {a: true, b: false}
   : RecordAggregatedValues<OmitId<P>> extends Truthy
-  ? true // Whitelist e.g. {a: 1}
+  ? true // Inclusion projection e.g. {a: 1}
   : RecordAggregatedValues<OmitId<P>> extends Falsy
-  ? false // Blacklist e.g. {a: 0}
+  ? false // Exclusion projection e.g. {a: 0}
   : never; // other invalid projections.
 
 export type NeverIfFalsyId<Key, P extends MongoProjection> = Key extends '_id'
@@ -47,30 +47,30 @@ export type NeverIfFalsyId<Key, P extends MongoProjection> = Key extends '_id'
     : Key
   : Key;
 
-type AddOrRemoveIdFromWhiteProjection<
+type AddOrRemoveIdFromInclusionProjection<
   Keys extends string,
   P extends MongoProjection,
 > = P['_id'] extends false ? Exclude<Keys, '_id'> : Keys | '_id';
 
-type AddOrRemoveIdFromBlackProjection<
+type AddOrRemoveIdFromExclusionProjection<
   Keys extends string,
   P extends MongoProjection,
 > = P['_id'] extends false ? Keys | '_id' : Exclude<Keys, '_id'>;
 
-// Use `' _wlp': never` as a white-list projection flag, so it doesnt get shown by IDEs.
+// Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
 export type Projected<
   EntityDoc extends EntityPayload,
   P extends MongoProjection,
 > = IsEmptyObject<P> extends true
   ? EntityDoc // e.g. {}
-  : IsWhitelistProjection<P> extends never
+  : IsInclusionProjection<P> extends never
   ? never // invalid projection e.g. {a: true, b: false}
-  : IsWhitelistProjection<P> extends true
+  : IsInclusionProjection<P> extends true
   ? Pick<
       EntityDoc,
-      keyof EntityDoc & AddOrRemoveIdFromWhiteProjection<string & keyof EntityDoc & keyof P, P>
+      keyof EntityDoc & AddOrRemoveIdFromInclusionProjection<string & keyof EntityDoc & keyof P, P>
     > & {
-      [Key in Exclude<keyof P, keyof EntityDoc> | ' _wlp']: Key extends ' _wlp' ? never : unknown;
+      [Key in Exclude<keyof P, keyof EntityDoc> | ' _ip']: Key extends ' _ip' ? never : unknown;
     }
-  : Omit<EntityDoc, AddOrRemoveIdFromBlackProjection<string & keyof P, P>>;
+  : Omit<EntityDoc, AddOrRemoveIdFromExclusionProjection<string & keyof P, P>>;

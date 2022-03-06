@@ -21,20 +21,20 @@ if (isEntityInstanceOf<Mother, Child>(mother, Child)) {
   expectType<Mother & Child>(mother);
 }
 
-const motherWhiteList = {} as Pick<Mother, 'a' | 'b'> & { ' _wlp': never; h: unknown };
+const motherInclusionProjection = {} as Pick<Mother, 'a' | 'b'> & { ' _ip': never; h: unknown };
 
-if (isEntityInstanceOf(motherWhiteList, Child)) {
-  expectType<{ a: string; b: string; h: unknown }>(motherWhiteList);
+if (isEntityInstanceOf(motherInclusionProjection, Child)) {
+  expectType<{ a: string; b: string; h: unknown }>(motherInclusionProjection);
 
   // @ts-expect-error 'c' is not projected.
-  expectType<{ c: string }>(motherWhiteList);
+  expectType<{ c: string }>(motherInclusionProjection);
 }
 
-const motherBlackList = {} as Omit<Mother, 'a' | 'b'> & { a: undefined; b: undefined };
+const motherExclusionProjection = {} as Omit<Mother, 'a' | 'b'> & { a: undefined; b: undefined };
 
-if (isEntityInstanceOf(motherBlackList, Child)) {
-  expectType<Omit<Child, 'a' | 'b'> & { a: undefined; b: undefined }>(motherBlackList);
+if (isEntityInstanceOf(motherExclusionProjection, Child)) {
+  expectType<Omit<Child, 'a' | 'b'> & { a: undefined; b: undefined }>(motherExclusionProjection);
 
   // @ts-expect-error 'a' was omitted
-  expectType<{ a: string }>(motherBlackList);
+  expectType<{ a: string }>(motherExclusionProjection);
 }
