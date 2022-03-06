@@ -24,6 +24,7 @@ type Foo = {
     f: {
       g: string;
       h: string;
+      i: string;
     };
   };
 };
@@ -39,6 +40,7 @@ expectType<Projected<Foo, {}>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -54,6 +56,7 @@ expectType<Projected<Foo, { _id: false }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -76,6 +79,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -114,6 +118,7 @@ expectType<Projected<Foo, { a: 0 }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -129,6 +134,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -143,6 +149,7 @@ expectType<Projected<Foo, { a: 0; _id: false }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -167,6 +174,7 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
       f: {
         g: string;
         h: string;
+        i: string;
       };
     };
   },
@@ -198,6 +206,35 @@ expectType<{
   ' _ip': never;
 }>({} as Projected<Foo, { a: 1; 'd.f.g': 1 }>);
 
+expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    d: {
+      f: {
+        g: string;
+        i: string;
+      };
+    };
+    ' _ip': never;
+  },
+);
+
+type Proj1 = Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>;
+type Proj1d = Proj1['d'];
+
+expectType<{
+  _id: ObjectId;
+  a: number;
+  d: {
+    f: {
+      g: string;
+      i: string;
+    };
+  };
+  ' _ip': never;
+}>({} as Proj1);
+
 expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
   {} as {
     _id: ObjectId;
@@ -207,6 +244,7 @@ expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
       e: string;
       f: {
         h: string;
+        i: string;
       };
     };
   },
@@ -223,3 +261,17 @@ expectType<{
     };
   };
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0 }>);
+
+expectType<Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+  },
+);
+
+expectType<{
+  _id: ObjectId;
+  b: string;
+  c: number;
+}>({} as Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>);
