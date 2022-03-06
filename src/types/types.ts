@@ -25,8 +25,12 @@ export type OmitNeverValues<T> = OmitIfValueMatches<T, never>;
 // The only way to evaluate truthy is to first evaluate NOT Falsy, and then evaluate (number | boolean).
 export type Falsy = 0 | false;
 
+export type MongoProjectionSlice = { $slice: number | [number, number] };
+
+export type MongoProjectionOperator = MongoProjectionSlice;
+
 export type MongoProjection = {
-  [Key in string]: number | boolean | string;
+  [Key in string]: number | boolean | string | MongoProjectionOperator;
 };
 
 export type OmitId<T> = Omit<T, '_id'>;

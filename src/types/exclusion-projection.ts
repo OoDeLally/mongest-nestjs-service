@@ -1,5 +1,11 @@
 import { GetEntityValueTypeOrUnknown, PickAndUnwrapIfMatchRootKey } from './projection-helpers';
-import { EntityPayload, Falsy, MongoPrimitiveObject, MongoProjection } from './types';
+import {
+  EntityPayload,
+  Falsy,
+  MongoPrimitiveObject,
+  MongoProjection,
+  MongoProjectionSlice,
+} from './types';
 
 type GetExclusionProjectedKeys<
   D extends EntityPayload,
@@ -15,10 +21,10 @@ type GetExclusionProjectedKeys<
 type ComputeExclusionProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
   ? ComputeExclusionProjectedValue<Item, P>[]
   : V extends object // Embedded object
-  ? ExclusionProjected<V, P>
+  ? ExclusionProjectedRec<V, P>
   : V; // Primitive value
 
-export type ExclusionProjected<
+type ExclusionProjectedRec<
   D extends EntityPayload,
   P extends MongoProjection,
   IsRootProjection = false,
@@ -32,3 +38,14 @@ export type ExclusionProjected<
         PickAndUnwrapIfMatchRootKey<P, Key>
       >;
 };
+
+type OmitSliceOperator<P extends MongoProjection> = {
+  // {myArray : {$slice: 42}} replaced by {}
+  // Since we are in a exclusion projection, omitting the field will provide the value.
+  [Key in keyof P as P[Key] extends MongoProjectionSlice ? never : Key]: P[Key];
+};
+
+export type ExclusionProjected<
+  D extends EntityPayload,
+  P extends MongoProjection,
+> = ExclusionProjectedRec<D, OmitSliceOperator<P>, true>;

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { ObjectId } from 'mongodb';
-import { IsInclusionProjection } from 'src/types/inclusion-projection';
+import { IsInclusionProjection } from 'src/types/is-inclusion-projection';
 import { Projected } from 'src/types/projection';
 import { expectType } from 'tsd';
 
@@ -45,6 +45,16 @@ type Iip7 = IsInclusionProjection<{ _id: false; a: 1 }>;
 type Iip7Expected = true;
 expectType<Iip7>({} as Iip7Expected);
 expectType<Iip7Expected>({} as Iip7);
+
+type Iip8 = IsInclusionProjection<{ a: { $slice: 1 } }>;
+type Iip8Expected = false;
+expectType<Iip8>({} as Iip8Expected);
+expectType<Iip8Expected>({} as Iip8);
+
+type Iip9 = IsInclusionProjection<{ a: { $slice: 1 }; b: 1 }>;
+type Iip9Expected = true;
+expectType<Iip9>({} as Iip9Expected);
+expectType<Iip9Expected>({} as Iip9);
 
 type Foo = {
   _id: ObjectId;
@@ -182,6 +192,29 @@ type Proj6Expected = {
 expectType<Proj6>({} as Proj6Expected);
 expectType<Proj6Expected>({} as Proj6);
 
+type Proj23 = Projected<
+  Foo,
+  {
+    _id: false;
+    a: 1;
+    d: 1;
+  }
+>;
+type Proj23Expected = {
+  a: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+  ' _ip': never;
+};
+expectType<Proj23>({} as Proj23Expected);
+expectType<Proj23Expected>({} as Proj23);
+
 type Proj7 = Projected<
   Foo,
   {
@@ -291,16 +324,16 @@ expectType<Proj11Expected>({} as Proj11);
 /** Nested fields */
 
 /** Nested inclusion projection */
+
 type Proj12 = Projected<
   Foo,
   {
+    _id: 0;
     a: 1;
     'd.f.g': 1;
   }
 >;
-
 type Proj12Expected = {
-  _id: ObjectId;
   a: number;
   d: {
     f: {
@@ -484,3 +517,52 @@ type Proj20Expected = {
 };
 expectType<Proj20>({} as Proj20Expected);
 expectType<Proj20Expected>({} as Proj20);
+
+/** Operators $slice */
+
+type Proj21 = Projected<
+  Foo,
+  {
+    a: 1;
+    d: { $slice: 43 };
+  }
+>;
+
+type Proj21Expected = {
+  _id: ObjectId;
+  a: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+  ' _ip': never;
+};
+expectType<Proj21>({} as Proj21Expected);
+expectType<Proj21Expected>({} as Proj21);
+
+type Proj22 = Projected<
+  Foo,
+  {
+    a: 0;
+    d: { $slice: 43 };
+  }
+>;
+type Proj22Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj22>({} as Proj22Expected);
+expectType<Proj22Expected>({} as Proj22);

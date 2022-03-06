@@ -1,39 +1,8 @@
 import { GetEntityValueTypeOrUnknown, PickAndUnwrapIfMatchRootKey } from './projection-helpers';
-import {
-  EntityPayload,
-  Falsy,
-  MongoPrimitiveObject,
-  MongoProjection,
-  OmitId,
-  OmitNeverValues,
-} from './types';
+import { ResolveProjectionReference } from './resolve-projection-reference';
+import { EntityPayload, Falsy, MongoProjection, MongoProjectionSlice } from './types';
 
 // Known limitations: No $operator in projection.
-
-type RecordValuesUnion<R extends EntityPayload> = R extends Record<string, infer V> ? V : never;
-
-type IsMixedProjection<R extends EntityPayload> = Extract<RecordValuesUnion<R>, Falsy> extends never
-  ? false // Exclusion projection => Not mixed => false
-  : Exclude<RecordValuesUnion<R>, Falsy> extends never
-  ? false // Inclusion projection => Not mixed => false
-  : true;
-
-type IsEmptyObject<T> = T extends Record<string, never> ? true : false;
-
-export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> extends true
-  ? false // e.g. {}
-  : keyof OmitId<P> extends never
-  ? // The projection only contains `_id` and no other field.
-    P['_id'] extends Falsy
-    ? false // e.g. {_id: false}
-    : P['_id'] extends number | boolean | string
-    ? true // e.g. {_id: true}
-    : never // invalid projection e.g. {a: true, b: false}
-  : IsMixedProjection<OmitId<P>> extends true
-  ? never // invalid projections e.g. {a: 0, b: 1}
-  : Exclude<RecordValuesUnion<OmitId<P>>, Falsy> extends never
-  ? false // Exclusion projection e.g. {a: 0, b: false}
-  : true; // {a: 1, b: 'foo'}
 
 type GetRootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
 
@@ -53,10 +22,10 @@ type ComputeInclusionProjectedValue<
 > = V extends (infer Item)[] // Embedded array
   ? ComputeInclusionProjectedValue<Item, P, ResolvedRefs>[]
   : V extends object // Embedded object
-  ? InclusionProjected<V, P, ResolvedRefs>
+  ? InclusionProjectedRec<V, P, ResolvedRefs>
   : V; // Primitive value
 
-export type InclusionProjected<
+type InclusionProjectedRec<
   D extends EntityPayload,
   P extends MongoProjection,
   ResolvedRefs extends EntityPayload,
@@ -66,12 +35,14 @@ export type InclusionProjected<
     | (IsRootProjection extends true ? ' _ip' : never)
     | GetRootKey<GetInclusionProjectedKeys<P, IsRootProjection>>]: Key extends ' _ip'
     ? never
+    : Key extends '_id' & keyof D
+    ? D[Key]
     : Key extends keyof ResolvedRefs
     ? ResolvedRefs[Key]
     : P[Key] extends string
     ? P[Key] // Projection is using a direct primitive.
-    : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
-    ? GetEntityValueTypeOrUnknown<D, Key> // primitive object e.g. Date, ObjectId.
+    : Key extends keyof D & keyof P
+    ? D[Key] // The key matches exactly a key from the document.
     : ComputeInclusionProjectedValue<
         GetEntityValueTypeOrUnknown<D, Key>,
         PickAndUnwrapIfMatchRootKey<P, Key>,
@@ -79,21 +50,17 @@ export type InclusionProjected<
       >;
 };
 
-type GetByPath<V, Path extends string> = V extends (infer Item)[]
-  ? GetByPath<Item, Path>
-  : V extends MongoPrimitiveObject
-  ? never
-  : Path extends keyof V
-  ? V[Path]
-  : Path extends `${infer RootKey}.${infer ChildKey}`
-  ? RootKey extends keyof V
-    ? GetByPath<V[RootKey], ChildKey>
-    : never
-  : never;
+type SubstituteSliceOperator<P extends MongoProjection> = {
+  // {myArray : {$slice: 42}} replaced by {myArray: 1}
+  [Key in keyof P]: P[Key] extends MongoProjectionSlice ? true : P[Key];
+};
 
-export type ResolveProjectionReference<
+export type InclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
-> = OmitNeverValues<{
-  [Key in keyof P]: P[Key] extends `$${infer Path}` ? GetByPath<D, Path> : never;
-}>;
+> = InclusionProjectedRec<
+  D,
+  SubstituteSliceOperator<P>,
+  ResolveProjectionReference<D, P>, // Resolve in advance all "$referenced.values".
+  true
+>;

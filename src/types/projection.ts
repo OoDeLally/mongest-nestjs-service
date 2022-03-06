@@ -1,9 +1,6 @@
 import { ExclusionProjected } from './exclusion-projection';
-import {
-  InclusionProjected,
-  IsInclusionProjection,
-  ResolveProjectionReference,
-} from './inclusion-projection';
+import { InclusionProjected } from './inclusion-projection';
+import { IsInclusionProjection } from './is-inclusion-projection';
 import { EntityPayload, MongoProjection } from './types';
 
 export type Projected<
@@ -12,7 +9,7 @@ export type Projected<
 > = IsInclusionProjection<P> extends never
   ? never // invalid projection e.g. {a: 1, b: 0}
   : IsInclusionProjection<P> extends true
-  ? InclusionProjected<D, P, ResolveProjectionReference<D, P>, true>
+  ? InclusionProjected<D, P>
   : IsInclusionProjection<P> extends false
-  ? ExclusionProjected<D, P, true>
+  ? ExclusionProjected<D, P>
   : never; // invalid projection (not sure whether that can happen)
