@@ -88,7 +88,7 @@ type PickAndUnwrapIfMatchRootKey<Proj extends MongoProjection, RootKey extends s
 
 type GetEntityValueTypeOrUnknown<D extends EntityPayload, K> = K extends keyof D ? D[K] : unknown;
 
-type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
+type GetInclusionProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
   (IdSpecialTreatment extends true
     ? Exclude<P['_id'], Falsy> extends never
       ? Exclude<keyof P, '_id'>
@@ -97,32 +97,32 @@ type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = f
 
 // Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
-type ComputeInclusiveProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
-  ? ComputeInclusiveProjectedValue<Item, P>[]
+type ComputeInclusionProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
+  ? ComputeInclusionProjectedValue<Item, P>[]
   : V extends object // Embedded object
-  ? InclusiveProjected<V, P>
+  ? InclusionProjected<V, P>
   : V; // Primitive value
 
-type InclusiveProjected<
+type InclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
   IsRootProjection = false,
 > = {
   [Key in
     | (IsRootProjection extends true ? ' _ip' : never)
-    | GetRootKey<GetInclusiveProjectedKeys<P, IsRootProjection>>]: Key extends ' _ip'
+    | GetRootKey<GetInclusionProjectedKeys<P, IsRootProjection>>]: Key extends ' _ip'
     ? never
     : P[Key] extends string
     ? P[Key] // Projection is using a direct primitive.
     : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key> // primitive object e.g. Date, ObjectId.
-    : ComputeInclusiveProjectedValue<
+    : ComputeInclusionProjectedValue<
         GetEntityValueTypeOrUnknown<D, Key>,
         PickAndUnwrapIfMatchRootKey<P, Key>
       >;
 };
 
-type GetExclusiveProjectedKeys<
+type GetExclusionProjectedKeys<
   D extends EntityPayload,
   P extends MongoProjection,
   IdSpecialTreatment = false,
@@ -135,22 +135,22 @@ type GetExclusiveProjectedKeys<
 
 // type FooProj = { a: 0; 'd.f.g': 0 };
 
-type ComputeExclusiveProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
-  ? ComputeExclusiveProjectedValue<Item, P>[]
+type ComputeExclusionProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
+  ? ComputeExclusionProjectedValue<Item, P>[]
   : V extends object // Embedded object
-  ? ExclusiveProjected<V, P>
+  ? ExclusionProjected<V, P>
   : V; // Primitive value
 
-type ExclusiveProjected<
+type ExclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
   IsRootProjection = false,
 > = {
-  [Key in GetExclusiveProjectedKeys<D, P, IsRootProjection>]: P[Key] extends string
+  [Key in GetExclusionProjectedKeys<D, P, IsRootProjection>]: P[Key] extends string
     ? never // Projection is using a direct primitive, but this is fobidden in an exclusion projection.
     : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key>
-    : ComputeExclusiveProjectedValue<
+    : ComputeExclusionProjectedValue<
         GetEntityValueTypeOrUnknown<D, Key>,
         PickAndUnwrapIfMatchRootKey<P, Key>
       >;
@@ -162,7 +162,7 @@ export type Projected<
 > = IsInclusionProjection<P> extends never
   ? never // invalid projection e.g. {a: 1, b: 0}
   : IsInclusionProjection<P> extends true
-  ? InclusiveProjected<D, P, true>
+  ? InclusionProjected<D, P, true>
   : IsInclusionProjection<P> extends false
-  ? ExclusiveProjected<D, P, true>
+  ? ExclusionProjected<D, P, true>
   : never; // invalid projection (not sure whether that can happen)

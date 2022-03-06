@@ -182,7 +182,7 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
 
 /** Nested fields */
 
-/** Nested inclusive projection */
+/** Nested inclusion projection */
 expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
   {} as {
     _id: ObjectId;
@@ -233,7 +233,7 @@ expectType<{
   ' _ip': never;
 }>({} as Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1; 'd.e': 1 }>);
 
-/** Nested exclusive projection */
+/** Nested exclusion projection */
 
 expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
   {} as {
@@ -339,7 +339,7 @@ expectType<{
   }[];
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
 
-/** Inclusive projection with string value */
+/** Inclusion projection with string value */
 
 expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.foo': 'yay' }>>(
   {} as {
@@ -376,8 +376,8 @@ expectType<{
   >,
 );
 
-/** Exclusive projection with string value */
+/** Exclusion projection with string value */
 
-// Direct value in an exclusive projection is forbidden.
+// Direct value in an exclusion projection is forbidden.
 expectType<Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>>({} as never);
 expectType<never>({} as Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>);
