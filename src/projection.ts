@@ -55,6 +55,8 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
   ? false // Exclusion projection e.g. {a: 0, b: false}
   : true; // {a: 1, b: 'foo'}
 
+type Yo = IsInclusionProjection<{ a: 1; 'd.f.g': 0 }>;
+
 type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
   (IdSpecialTreatment extends true
     ? Exclude<P['_id'], Falsy> extends never
@@ -110,16 +112,16 @@ type InclusiveProjected<
     : GetEntityValueTypeOrUnknown<D, Key>;
 };
 
-type Bar1 = InclusiveProjected<Foo, FooProj, true>;
-
 // Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
 export type Projected<
   D extends EntityPayload,
   P extends MongoProjection,
-> = IsInclusionProjection<P> extends true
+> = IsInclusionProjection<P> extends never
+  ? never // invalid projection e.g. {a: true, b: false}
+  : IsInclusionProjection<P> extends true
   ? InclusiveProjected<D, P, true>
   : IsInclusionProjection<P> extends false
   ? // Exclusive projection
     Omit<D, GetExclusiveProjectedKeys<P>>
-  : never; // invalid projection e.g. {a: true, b: false}
+  : never; // invalid projection

@@ -174,8 +174,6 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
 
 /** Nested fields */
 
-type Bar = Projected<Foo, { a: 1; 'd.f.g': 1 }>;
-
 expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
   {} as {
     _id: ObjectId;
