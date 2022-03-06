@@ -67,15 +67,15 @@ type AddOrRemoveIdFromExclusionProjection<
 export type Projected<
   EntityDoc extends EntityPayload,
   P extends MongoProjection,
-> = IsEmptyObject<P> extends true
-  ? EntityDoc // e.g. {}
-  : IsInclusionProjection<P> extends never
-  ? never // invalid projection e.g. {a: true, b: false}
-  : IsInclusionProjection<P> extends true
-  ? Pick<
+> = IsInclusionProjection<P> extends true
+  ? // Inclusive projection
+    Pick<
       EntityDoc,
       keyof EntityDoc & AddOrRemoveIdFromInclusionProjection<string & keyof EntityDoc & keyof P, P>
     > & {
       [Key in Exclude<keyof P, keyof EntityDoc> | ' _ip']: Key extends ' _ip' ? never : unknown;
     }
-  : Omit<EntityDoc, AddOrRemoveIdFromExclusionProjection<string & keyof P, P>>;
+  : IsInclusionProjection<P> extends false
+  ? // Exclusive projection
+    Omit<EntityDoc, AddOrRemoveIdFromExclusionProjection<string & keyof P, P>>
+  : never; // invalid projection e.g. {a: true, b: false}

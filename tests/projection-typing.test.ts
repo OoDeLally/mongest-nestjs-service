@@ -178,7 +178,12 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
   {} as {
     _id: ObjectId;
     a: number;
-    extra: unknown;
+    d: {
+      e: string;
+      f: {
+        g: string;
+      };
+    };
     ' _ip': never;
   },
 );
