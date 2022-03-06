@@ -26,7 +26,7 @@ type Foo = {
       h: string;
       i: string;
     };
-  };
+  }[];
 };
 
 expectType<Projected<Foo, {}>>(
@@ -42,7 +42,7 @@ expectType<Projected<Foo, {}>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -58,7 +58,7 @@ expectType<Projected<Foo, { _id: false }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -81,7 +81,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -120,7 +120,7 @@ expectType<Projected<Foo, { a: 0 }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -136,7 +136,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -151,7 +151,7 @@ expectType<Projected<Foo, { a: 0; _id: false }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -176,7 +176,7 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -191,7 +191,8 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
       f: {
         g: string;
       };
-    };
+    }[];
+
     ' _ip': never;
   },
 );
@@ -203,7 +204,7 @@ expectType<{
     f: {
       g: string;
     };
-  };
+  }[];
   ' _ip': never;
 }>({} as Projected<Foo, { a: 1; 'd.f.g': 1 }>);
 
@@ -216,7 +217,7 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>>(
         g: string;
         i: string;
       };
-    };
+    }[];
     ' _ip': never;
   },
 );
@@ -229,7 +230,7 @@ expectType<{
       g: string;
       i: string;
     };
-  };
+  }[];
   ' _ip': never;
 }>({} as Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1; 'd.e': 1 }>);
 
@@ -246,7 +247,7 @@ expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -260,7 +261,7 @@ expectType<{
       h: string;
       i: string;
     };
-  };
+  }[];
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0 }>);
 
 /** Unecessary projection */
@@ -275,7 +276,7 @@ expectType<Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>>(
         h: string;
         i: string;
       };
-    };
+    }[];
   },
 );
 
@@ -296,7 +297,7 @@ expectType<Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>>(
       f: {
         h: string;
       };
-    };
+    }[];
   },
 );
 
@@ -309,5 +310,5 @@ expectType<{
     f: {
       h: string;
     };
-  };
+  }[];
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);

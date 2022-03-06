@@ -97,6 +97,12 @@ type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = f
 
 // Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
+type ComputeInclusiveProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
+  ? ComputeInclusiveProjectedValue<Item, P>[]
+  : V extends object // Embedded object
+  ? InclusiveProjected<V, P>
+  : V; // Primitive value
+
 type InclusiveProjected<
   D extends EntityPayload,
   P extends MongoProjection,
@@ -108,9 +114,10 @@ type InclusiveProjected<
     ? never
     : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key> // primitive object e.g. Date, ObjectId.
-    : GetEntityValueTypeOrUnknown<D, Key> extends object // Embedded object
-    ? InclusiveProjected<GetEntityValueTypeOrUnknown<D, Key>, PickAndUnwrapIfMatchRootKey<P, Key>>
-    : GetEntityValueTypeOrUnknown<D, Key>;
+    : ComputeInclusiveProjectedValue<
+        GetEntityValueTypeOrUnknown<D, Key>,
+        PickAndUnwrapIfMatchRootKey<P, Key>
+      >;
 };
 
 type GetExclusiveProjectedKeys<
@@ -126,6 +133,12 @@ type GetExclusiveProjectedKeys<
 
 // type FooProj = { a: 0; 'd.f.g': 0 };
 
+type ComputeExclusiveProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
+  ? ComputeExclusiveProjectedValue<Item, P>[]
+  : V extends object // Embedded object
+  ? ExclusiveProjected<V, P>
+  : V; // Primitive value
+
 type ExclusiveProjected<
   D extends EntityPayload,
   P extends MongoProjection,
@@ -136,9 +149,10 @@ type ExclusiveProjected<
     Key
   > extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key>
-    : GetEntityValueTypeOrUnknown<D, Key> extends object
-    ? ExclusiveProjected<GetEntityValueTypeOrUnknown<D, Key>, PickAndUnwrapIfMatchRootKey<P, Key>>
-    : GetEntityValueTypeOrUnknown<D, Key>;
+    : ComputeExclusiveProjectedValue<
+        GetEntityValueTypeOrUnknown<D, Key>,
+        PickAndUnwrapIfMatchRootKey<P, Key>
+      >;
 };
 
 export type Projected<
