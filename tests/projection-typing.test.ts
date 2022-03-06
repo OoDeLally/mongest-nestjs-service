@@ -174,12 +174,13 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
 
 /** Nested fields */
 
+type Bar = Projected<Foo, { a: 1; 'd.f.g': 1 }>;
+
 expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
   {} as {
     _id: ObjectId;
     a: number;
     d: {
-      e: string;
       f: {
         g: string;
       };
@@ -187,3 +188,14 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
     ' _ip': never;
   },
 );
+
+expectType<{
+  _id: ObjectId;
+  a: number;
+  d: {
+    f: {
+      g: string;
+    };
+  };
+  ' _ip': never;
+}>({} as Projected<Foo, { a: 1; 'd.f.g': 1 }>);

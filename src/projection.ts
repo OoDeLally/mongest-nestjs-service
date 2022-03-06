@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { EntityPayload } from './types';
 
 // Known limitations:
@@ -9,7 +10,9 @@ import { EntityPayload } from './types';
 // The only way to evaluate truthy is to first evaluate NOT Falsy, and then evaluate (number | boolean).
 type Falsy = 0 | false;
 
-export type MongoProjection = Record<string, number | boolean | string>;
+export type MongoProjection = {
+  [Key in string]: number | boolean | string;
+};
 
 export type RecordValuesUnion<R extends EntityPayload> = R extends Record<string, infer V>
   ? V
@@ -52,30 +55,71 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
   ? false // Exclusion projection e.g. {a: 0, b: false}
   : true; // {a: 1, b: 'foo'}
 
-type AddOrRemoveIdFromInclusionProjection<
-  Keys extends string,
-  P extends MongoProjection,
-> = P['_id'] extends false ? Exclude<Keys, '_id'> : Keys | '_id';
+type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
+  (IdSpecialTreatment extends true
+    ? Exclude<P['_id'], Falsy> extends never
+      ? Exclude<keyof P, '_id'>
+      : keyof P | '_id'
+    : keyof P);
 
-type AddOrRemoveIdFromExclusionProjection<
-  Keys extends string,
+type GetExclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
+  (IdSpecialTreatment extends true
+    ? Exclude<P['_id'], Falsy> extends never
+      ? keyof P | '_id'
+      : Exclude<keyof P, '_id'>
+    : keyof P);
+
+type RootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
+
+// type Foo1 = RootKey<'foo.bar'>;
+// type Foo2 = RootKey<'foo'>;
+
+type Foo = {
+  _id: ObjectId;
+  a: number;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+    };
+  };
+};
+
+type FooProj = { a: 1; 'd.f.g': 1 };
+
+type GetEntityValueTypeOrUnknown<D extends EntityPayload, K extends string> = K extends keyof D
+  ? D[K]
+  : unknown;
+
+type InclusiveProjected<
+  D extends EntityPayload,
   P extends MongoProjection,
-> = P['_id'] extends false ? Keys | '_id' : Exclude<Keys, '_id'>;
+  IsRootProjection = false,
+> = {
+  [Key in
+    | (IsRootProjection extends true ? ' _ip' : never)
+    | GetInclusiveProjectedKeys<P, IsRootProjection> as RootKey<Key>]: Key extends ' _ip'
+    ? never
+    : Key extends `${infer RootKey}.${infer ChildKey}`
+    ? GetEntityValueTypeOrUnknown<D, RootKey> extends object
+      ? InclusiveProjected<GetEntityValueTypeOrUnknown<D, RootKey>, { [key in ChildKey]: P[Key] }>
+      : unknown
+    : GetEntityValueTypeOrUnknown<D, Key>;
+};
+
+type Bar1 = InclusiveProjected<Foo, FooProj, true>;
 
 // Use `' _ip': never` as a (I)nclusion (P)rojection flag, so it doesnt get shown by IDEs.
 
 export type Projected<
-  EntityDoc extends EntityPayload,
+  D extends EntityPayload,
   P extends MongoProjection,
 > = IsInclusionProjection<P> extends true
-  ? // Inclusive projection
-    Pick<
-      EntityDoc,
-      keyof EntityDoc & AddOrRemoveIdFromInclusionProjection<string & keyof EntityDoc & keyof P, P>
-    > & {
-      [Key in Exclude<keyof P, keyof EntityDoc> | ' _ip']: Key extends ' _ip' ? never : unknown;
-    }
+  ? InclusiveProjected<D, P, true>
   : IsInclusionProjection<P> extends false
   ? // Exclusive projection
-    Omit<EntityDoc, AddOrRemoveIdFromExclusionProjection<string & keyof P, P>>
+    Omit<D, GetExclusiveProjectedKeys<P>>
   : never; // invalid projection e.g. {a: true, b: false}
