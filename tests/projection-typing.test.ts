@@ -566,3 +566,50 @@ type Proj22Expected = {
 };
 expectType<Proj22>({} as Proj22Expected);
 expectType<Proj22Expected>({} as Proj22);
+
+type Proj24 = Projected<
+  Foo,
+  {
+    a: 0;
+    d: { $elemMatch: { name: 'foo' } };
+  }
+>;
+type Proj24Expected = {
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+};
+expectType<Proj24>({} as Proj24Expected);
+expectType<Proj24Expected>({} as Proj24);
+
+type Proj25 = Projected<
+  Foo,
+  {
+    a: 1;
+    d: { $elemMatch: { name: 'foo' } };
+  }
+>;
+
+type Proj25Expected = {
+  _id: ObjectId;
+  a: number;
+  d: {
+    e: string;
+    f: {
+      g: string;
+      h: string;
+      i: Date;
+    };
+  }[];
+  ' _ip': never;
+};
+expectType<Proj25>({} as Proj25Expected);
+expectType<Proj25Expected>({} as Proj25);

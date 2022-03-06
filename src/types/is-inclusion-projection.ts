@@ -1,4 +1,11 @@
-import { EntityPayload, Falsy, MongoProjection, MongoProjectionSlice, OmitId } from './types';
+import {
+  EntityPayload,
+  Falsy,
+  MongoProjection,
+  MongoProjectionElemMatch,
+  MongoProjectionSlice,
+  OmitId,
+} from './types';
 
 type RecordValuesUnion<R extends EntityPayload> = R extends Record<string, infer V> ? V : never;
 
@@ -11,7 +18,9 @@ type IsMixedProjection<R extends EntityPayload> = Extract<RecordValuesUnion<R>, 
 type IsEmptyObject<T> = T extends Record<string, never> ? true : false;
 
 type OmitOperators<P extends MongoProjection> = {
-  [Key in keyof P as P[Key] extends MongoProjectionSlice ? never : Key]: P[Key];
+  [Key in keyof P as P[Key] extends MongoProjectionSlice | MongoProjectionElemMatch
+    ? never
+    : Key]: P[Key];
 };
 
 type _IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> extends true

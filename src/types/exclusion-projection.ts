@@ -4,6 +4,7 @@ import {
   Falsy,
   MongoPrimitiveObject,
   MongoProjection,
+  MongoProjectionElemMatch,
   MongoProjectionSlice,
 } from './types';
 
@@ -45,7 +46,13 @@ type OmitSliceOperator<P extends MongoProjection> = {
   [Key in keyof P as P[Key] extends MongoProjectionSlice ? never : Key]: P[Key];
 };
 
+type OmitElemMatchOperator<P extends MongoProjection> = {
+  // {myArray : {$elemMatch: {name: 'Bobo'}}} replaced by {}
+  // Since we are in a exclusion projection, omitting the field will provide the value.
+  [Key in keyof P as P[Key] extends MongoProjectionElemMatch ? never : Key]: P[Key];
+};
+
 export type ExclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
-> = ExclusionProjectedRec<D, OmitSliceOperator<P>, true>;
+> = ExclusionProjectedRec<D, OmitElemMatchOperator<OmitSliceOperator<P>>, true>;

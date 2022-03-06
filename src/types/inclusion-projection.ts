@@ -1,6 +1,12 @@
 import { GetEntityValueTypeOrUnknown, PickAndUnwrapIfMatchRootKey } from './projection-helpers';
 import { ResolveProjectionReference } from './resolve-projection-reference';
-import { EntityPayload, Falsy, MongoProjection, MongoProjectionSlice } from './types';
+import {
+  EntityPayload,
+  Falsy,
+  MongoProjection,
+  MongoProjectionElemMatch,
+  MongoProjectionSlice,
+} from './types';
 
 // Known limitations: No $operator in projection.
 
@@ -55,12 +61,17 @@ type SubstituteSliceOperator<P extends MongoProjection> = {
   [Key in keyof P]: P[Key] extends MongoProjectionSlice ? true : P[Key];
 };
 
+type SubstituteElemMatchOperator<P extends MongoProjection> = {
+  // {myArray : {$elemMatch: 42}} replaced by {myArray: 1}
+  [Key in keyof P]: P[Key] extends MongoProjectionElemMatch ? true : P[Key];
+};
+
 export type InclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
 > = InclusionProjectedRec<
   D,
-  SubstituteSliceOperator<P>,
+  SubstituteElemMatchOperator<SubstituteSliceOperator<P>>,
   ResolveProjectionReference<D, P>, // Resolve in advance all "$referenced.values".
   true
 >;

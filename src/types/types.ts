@@ -26,8 +26,9 @@ export type OmitNeverValues<T> = OmitIfValueMatches<T, never>;
 export type Falsy = 0 | false;
 
 export type MongoProjectionSlice = { $slice: number | [number, number] };
+export type MongoProjectionElemMatch = { $elemMatch: object };
 
-export type MongoProjectionOperator = MongoProjectionSlice;
+export type MongoProjectionOperator = MongoProjectionSlice | MongoProjectionElemMatch;
 
 export type MongoProjection = {
   [Key in string]: number | boolean | string | MongoProjectionOperator;
