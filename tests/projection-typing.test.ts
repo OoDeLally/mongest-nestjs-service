@@ -220,9 +220,6 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>>(
   },
 );
 
-type Proj1 = Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>;
-type Proj1d = Proj1['d'];
-
 expectType<{
   _id: ObjectId;
   a: number;
@@ -233,7 +230,7 @@ expectType<{
     };
   };
   ' _ip': never;
-}>({} as Proj1);
+}>({} as Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1; 'd.e': 1 }>);
 
 expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
   {} as {

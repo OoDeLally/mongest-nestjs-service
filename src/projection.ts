@@ -55,10 +55,23 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
   ? false // Exclusion projection e.g. {a: 0, b: false}
   : true; // {a: 1, b: 'foo'}
 
-type RootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
+type GetRootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
 
-// type Foo1 = RootKey<'foo.bar'>;
-// type Foo2 = RootKey<'foo'>;
+// type Foo1 = GetRootKey<'foo.bar' | 'foo.baz' | 'yay'>;
+// type Foo2 = GetRootKey<'foo'>;
+
+type PickAndUnwrapIfMatchRootKey<Proj extends MongoProjection, RootKey extends string> = {
+  [Key in keyof Proj as Key extends `${RootKey}.${infer ChildKey}` ? ChildKey : never]: Proj[Key];
+};
+
+// type Foo1 = PickAndUnwrapIfMatchRootKey<{ a: 1; 'd.f.g': 1; 'd.f.i': 1 }, 'd'>;
+
+type ExtractAndUnwrapIfMatchRootKey<
+  KeyList extends string,
+  RootKey extends string,
+> = KeyList extends `${RootKey}.${infer ChildKey}` ? ChildKey : never;
+
+// type Foo1 = ExtractAndUnwrapIfMatchRootKey<'a.d' | 'a.e' | 'c.c', 'a'>
 
 type Foo = {
   _id: ObjectId;
@@ -74,9 +87,13 @@ type Foo = {
   };
 };
 
-type GetEntityValueTypeOrUnknown<D extends EntityPayload, K extends string> = K extends keyof D
+type GetEntityValueTypeOrUnknown<D extends EntityPayload, K> = K extends keyof D ? D[K] : unknown;
+
+type GetEntityValueTypeOrNever<D extends EntityPayload | never, K> = D extends never
+  ? never
+  : K extends keyof D
   ? D[K]
-  : unknown;
+  : never;
 
 type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
   (IdSpecialTreatment extends true
@@ -94,18 +111,14 @@ type InclusiveProjected<
 > = {
   [Key in
     | (IsRootProjection extends true ? ' _ip' : never)
-    | GetInclusiveProjectedKeys<P, IsRootProjection> as RootKey<Key>]: Key extends ' _ip'
+    | GetRootKey<GetInclusiveProjectedKeys<P, IsRootProjection>>]: Key extends ' _ip'
     ? never
-    : Key extends `${infer RootKey}.${infer ChildKey}`
-    ? GetEntityValueTypeOrUnknown<D, RootKey> extends MongoPrimitiveObject
-      ? never
-      : GetEntityValueTypeOrUnknown<D, RootKey> extends object // Embedded object
-      ? InclusiveProjected<GetEntityValueTypeOrUnknown<D, RootKey>, { [key in ChildKey]: P[Key] }>
-      : unknown
+    : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
+    ? GetEntityValueTypeOrUnknown<D, Key> // primitive object e.g. Date, ObjectId.
+    : GetEntityValueTypeOrUnknown<D, Key> extends object // Embedded object
+    ? InclusiveProjected<GetEntityValueTypeOrUnknown<D, Key>, PickAndUnwrapIfMatchRootKey<P, Key>>
     : GetEntityValueTypeOrUnknown<D, Key>;
 };
-
-type ExtractRootKeys<Key extends string> = Key extends `${string}.${string}` ? never : Key;
 
 type GetExclusiveProjectedKeys<
   D extends EntityPayload,
@@ -119,10 +132,6 @@ type GetExclusiveProjectedKeys<
     : Exclude<keyof D, keyof P>);
 
 type FooProj = { a: 0; 'd.f.g': 0 };
-
-type PickAndUnwrapIfMatchRootKey<Proj extends MongoProjection, RootKey extends string> = {
-  [Key in keyof Proj as Key extends `${RootKey}.${infer ChildKey}` ? ChildKey : never]: Proj[Key];
-};
 
 type ExclusiveProjected<
   D extends EntityPayload,
