@@ -21,9 +21,8 @@ import {
   UpdateOneOptions,
 } from './MongestService';
 import { paginateQuery } from './pagination';
-import { MongoProjection } from './projection';
 import { getEntityClassForSchema } from './registerEntityClassForSchema';
-import { AbstractType, EntityPayload, ExtractIdType, OmitId } from './types';
+import { AbstractType, EntityPayload, ExtractIdType, MongoProjection, OmitId } from './types/types';
 
 export function BuildMongestService<EDoc extends EntityPayload>(
   EntityClass: Type<EDoc>,

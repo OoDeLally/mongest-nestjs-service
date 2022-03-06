@@ -1,8 +1,8 @@
 import { UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
 import { SortObject } from './pagination';
-import { MongoProjection, Projected } from './projection';
-import { EntityPayload, ExtractIdType, OmitId } from './types';
+import { Projected } from './types/projection';
+import { EntityPayload, ExtractIdType, MongoProjection, OmitId } from './types/types';
 
 export type CountDocumentsOptions = {
   skip?: number;

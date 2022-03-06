@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { EntityPayload } from './types';
+import { EntityPayload } from './types/types';
 
 type OnlyUndefinedFields<Doc extends EntityPayload> = {
   [Key in keyof Doc as Doc[Key] extends undefined ? Key : never]: Doc[Key];

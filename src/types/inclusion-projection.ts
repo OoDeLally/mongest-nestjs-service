@@ -1,18 +1,16 @@
-import { EntityPayload, MongoPrimitiveObject, OmitNeverValues } from './types';
+import { GetEntityValueTypeOrUnknown, PickAndUnwrapIfMatchRootKey } from './projection-helpers';
+import {
+  EntityPayload,
+  Falsy,
+  MongoPrimitiveObject,
+  MongoProjection,
+  OmitId,
+  OmitNeverValues,
+} from './types';
 
 // Known limitations: No $operator in projection.
 
-// Note: // Type `Truthy` cannot be expressed in TS because we cannot exclude a set e.g. type Truthy = ((number | boolean) \ Falsy)
-// The only way to evaluate truthy is to first evaluate NOT Falsy, and then evaluate (number | boolean).
-type Falsy = 0 | false;
-
-export type MongoProjection = {
-  [Key in string]: number | boolean | string;
-};
-
-export type RecordValuesUnion<R extends EntityPayload> = R extends Record<string, infer V>
-  ? V
-  : never;
+type RecordValuesUnion<R extends EntityPayload> = R extends Record<string, infer V> ? V : never;
 
 type IsMixedProjection<R extends EntityPayload> = Extract<RecordValuesUnion<R>, Falsy> extends never
   ? false // Exclusion projection => Not mixed => false
@@ -22,13 +20,9 @@ type IsMixedProjection<R extends EntityPayload> = Extract<RecordValuesUnion<R>, 
 
 type IsEmptyObject<T> = T extends Record<string, never> ? true : false;
 
-type OmitId<P extends Record<string, unknown>> = {
-  [Key in keyof P]: Key extends '_id' ? never : P[Key];
-};
-
 export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> extends true
   ? false // e.g. {}
-  : RecordValuesUnion<OmitId<P>> extends never
+  : keyof OmitId<P> extends never
   ? // The projection only contains `_id` and no other field.
     P['_id'] extends Falsy
     ? false // e.g. {_id: false}
@@ -42,12 +36,6 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
   : true; // {a: 1, b: 'foo'}
 
 type GetRootKey<Key extends string> = Key extends `${infer Prefix}.${string}` ? Prefix : Key;
-
-type PickAndUnwrapIfMatchRootKey<Proj extends object, RootKey extends string> = {
-  [Key in keyof Proj as Key extends `${RootKey}.${infer ChildKey}` ? ChildKey : never]: Proj[Key];
-};
-
-type GetEntityValueTypeOrUnknown<D extends EntityPayload, K> = K extends keyof D ? D[K] : unknown;
 
 type GetInclusionProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
   (IdSpecialTreatment extends true
@@ -68,7 +56,7 @@ type ComputeInclusionProjectedValue<
   ? InclusionProjected<V, P, ResolvedRefs>
   : V; // Primitive value
 
-type InclusionProjected<
+export type InclusionProjected<
   D extends EntityPayload,
   P extends MongoProjection,
   ResolvedRefs extends EntityPayload,
@@ -91,38 +79,6 @@ type InclusionProjected<
       >;
 };
 
-type GetExclusionProjectedKeys<
-  D extends EntityPayload,
-  P extends MongoProjection,
-  IdSpecialTreatment = false,
-> = string &
-  (IdSpecialTreatment extends true
-    ? Exclude<P['_id'], Falsy> extends never // _id is Falsy
-      ? Exclude<keyof D, '_id' | keyof P>
-      : Exclude<keyof D, keyof P> | '_id'
-    : Exclude<keyof D, keyof P>);
-
-type ComputeExclusionProjectedValue<V, P extends MongoProjection> = V extends (infer Item)[] // Embedded array
-  ? ComputeExclusionProjectedValue<Item, P>[]
-  : V extends object // Embedded object
-  ? ExclusionProjected<V, P>
-  : V; // Primitive value
-
-type ExclusionProjected<
-  D extends EntityPayload,
-  P extends MongoProjection,
-  IsRootProjection = false,
-> = {
-  [Key in GetExclusionProjectedKeys<D, P, IsRootProjection>]: P[Key] extends string
-    ? never // Projection is using a direct primitive, but this is fobidden in an exclusion projection.
-    : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
-    ? GetEntityValueTypeOrUnknown<D, Key>
-    : ComputeExclusionProjectedValue<
-        GetEntityValueTypeOrUnknown<D, Key>,
-        PickAndUnwrapIfMatchRootKey<P, Key>
-      >;
-};
-
 type GetByPath<V, Path extends string> = V extends (infer Item)[]
   ? GetByPath<Item, Path>
   : V extends MongoPrimitiveObject
@@ -135,20 +91,9 @@ type GetByPath<V, Path extends string> = V extends (infer Item)[]
     : never
   : never;
 
-type ResolveProjectionReference<
+export type ResolveProjectionReference<
   D extends EntityPayload,
   P extends MongoProjection,
 > = OmitNeverValues<{
   [Key in keyof P]: P[Key] extends `$${infer Path}` ? GetByPath<D, Path> : never;
 }>;
-
-export type Projected<
-  D extends EntityPayload,
-  P extends MongoProjection,
-> = IsInclusionProjection<P> extends never
-  ? never // invalid projection e.g. {a: 1, b: 0}
-  : IsInclusionProjection<P> extends true
-  ? InclusionProjected<D, P, ResolveProjectionReference<D, P>, true>
-  : IsInclusionProjection<P> extends false
-  ? ExclusionProjected<D, P, true>
-  : never; // invalid projection (not sure whether that can happen)

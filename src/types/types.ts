@@ -12,8 +12,6 @@ export type ExtractIdType<EDoc extends EntityPayload> = '_id' extends keyof EDoc
   ? EDoc['_id']
   : ObjectId;
 
-export type OmitId<EDoc extends EntityPayload> = Omit<EDoc, '_id'>;
-
 // https://www.tutorialspoint.com/mongodb/mongodb_datatype.htm
 export type MongoPrimitiveObject = Timestamp | Symbol | Date | ObjectId | Binary | Code | RegExp;
 
@@ -22,3 +20,13 @@ export type OmitIfValueMatches<T, V> = {
 };
 
 export type OmitNeverValues<T> = OmitIfValueMatches<T, never>;
+
+// Note: // Type `Truthy` cannot be expressed in TS because we cannot exclude a set e.g. type Truthy = ((number | boolean) \ Falsy)
+// The only way to evaluate truthy is to first evaluate NOT Falsy, and then evaluate (number | boolean).
+export type Falsy = 0 | false;
+
+export type MongoProjection = {
+  [Key in string]: number | boolean | string;
+};
+
+export type OmitId<T> = Omit<T, '_id'>;

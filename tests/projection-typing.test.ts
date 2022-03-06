@@ -2,17 +2,49 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { ObjectId } from 'mongodb';
+import { IsInclusionProjection } from 'src/types/inclusion-projection';
+import { Projected } from 'src/types/projection';
 import { expectType } from 'tsd';
-import { IsInclusionProjection, Projected } from '../src/projection';
 
-expectType<IsInclusionProjection<{}>>(false);
-expectType<IsInclusionProjection<{ _id: true }>>(true);
-expectType<IsInclusionProjection<{ _id: false }>>(false);
-expectType<IsInclusionProjection<{ extraA: 1; extraB: 1 }>>(true);
-expectType<IsInclusionProjection<{ extraA: 0; extraB: 0 }>>(false);
-expectType<IsInclusionProjection<{ a: 1; b: 0 }>>({} as never);
-expectType<IsInclusionProjection<{ _id: true; a: 0 }>>(false);
-expectType<IsInclusionProjection<{ _id: false; a: 1 }>>(true);
+type Iip0 = IsInclusionProjection<{}>;
+type Iip0Expected = false;
+expectType<Iip0>({} as Iip0Expected);
+expectType<Iip0Expected>({} as Iip0);
+
+type Iip1 = IsInclusionProjection<{ _id: true }>;
+type Iip1Expected = true;
+expectType<Iip1>({} as Iip1Expected);
+expectType<Iip1Expected>({} as Iip1);
+
+type iip2 = IsInclusionProjection<{ _id: false }>;
+type Iip2Expected = false;
+expectType<iip2>({} as Iip2Expected);
+expectType<Iip2Expected>({} as iip2);
+
+type Iip3 = IsInclusionProjection<{ extraA: 1; extraB: 1 }>;
+type Iip3Expected = true;
+expectType<Iip3>({} as Iip3Expected);
+expectType<Iip3Expected>({} as Iip3);
+
+type Iip4 = IsInclusionProjection<{ extraA: 0; extraB: 0 }>;
+type Iip4Expected = false;
+expectType<Iip4>({} as Iip4Expected);
+expectType<Iip4Expected>({} as Iip4);
+
+type Iip5 = IsInclusionProjection<{ a: 1; b: 0 }>;
+type Iip5Expected = never;
+expectType<Iip5>({} as Iip5Expected);
+expectType<Iip5Expected>({} as Iip5);
+
+type Iip6 = IsInclusionProjection<{ _id: true; a: 0 }>;
+type Iip6Expected = false;
+expectType<Iip6>({} as Iip6Expected);
+expectType<Iip6Expected>({} as Iip6);
+
+type Iip7 = IsInclusionProjection<{ _id: false; a: 1 }>;
+type Iip7Expected = true;
+expectType<Iip7>({} as Iip7Expected);
+expectType<Iip7Expected>({} as Iip7);
 
 type Foo = {
   _id: ObjectId;
@@ -426,6 +458,7 @@ type Proj19 = Projected<
     'd.f.foo': 'yay';
   }
 >;
+
 type Proj19Expected = never;
 expectType<Proj19>({} as Proj19Expected);
 expectType<Proj19Expected>({} as Proj19);

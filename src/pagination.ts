@@ -1,6 +1,6 @@
 import { SortDirection } from 'mongodb';
 import { Query } from 'mongoose';
-import { EntityPayload } from './types';
+import { EntityPayload } from './types/types';
 
 export type SortObject<T extends EntityPayload> = Partial<Record<keyof T, SortDirection>>;
 
