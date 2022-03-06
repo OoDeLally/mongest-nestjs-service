@@ -24,7 +24,7 @@ type Foo = {
     f: {
       g: string;
       h: string;
-      i: string;
+      i: Date;
     };
   }[];
 };
@@ -40,7 +40,7 @@ expectType<Projected<Foo, {}>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -56,7 +56,7 @@ expectType<Projected<Foo, { _id: false }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -79,7 +79,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -118,7 +118,7 @@ expectType<Projected<Foo, { a: 0 }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -134,7 +134,7 @@ expectType<Projected<Foo, { a: 0; _id: true }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -149,7 +149,7 @@ expectType<Projected<Foo, { a: 0; _id: false }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -174,7 +174,7 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
       f: {
         g: string;
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -214,7 +214,7 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1 }>>(
     d: {
       f: {
         g: string;
-        i: string;
+        i: Date;
       };
     }[];
     ' _ip': never;
@@ -227,7 +227,7 @@ expectType<{
   d: {
     f: {
       g: string;
-      i: string;
+      i: Date;
     };
   }[];
   ' _ip': never;
@@ -244,7 +244,7 @@ expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
       e: string;
       f: {
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -258,7 +258,7 @@ expectType<{
     e: string;
     f: {
       h: string;
-      i: string;
+      i: Date;
     };
   }[];
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0 }>);
@@ -273,7 +273,7 @@ expectType<Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>>(
       e: string;
       f: {
         h: string;
-        i: string;
+        i: Date;
       };
     }[];
   },
@@ -381,3 +381,37 @@ expectType<{
 // Direct value in an exclusion projection is forbidden.
 expectType<Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>>({} as never);
 expectType<never>({} as Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>);
+
+/** Field reference */
+
+expectType<
+  Projected<
+    Foo,
+    {
+      a: 1;
+      'd.f.g': '$d.f.i';
+    }
+  >
+>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    d: {
+      f: {
+        g: Date;
+      };
+    }[];
+    ' _ip': never;
+  },
+);
+
+expectType<{
+  _id: ObjectId;
+  a: number;
+  d: {
+    f: {
+      g: Date;
+    };
+  }[];
+  ' _ip': never;
+}>({} as Projected<Foo, { a: 1; 'd.f.g': '$d.f.i' }>);

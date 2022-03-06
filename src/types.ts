@@ -16,3 +16,9 @@ export type OmitId<EDoc extends EntityPayload> = Omit<EDoc, '_id'>;
 
 // https://www.tutorialspoint.com/mongodb/mongodb_datatype.htm
 export type MongoPrimitiveObject = Timestamp | Symbol | Date | ObjectId | Binary | Code | RegExp;
+
+export type OmitIfValueMatches<T, V> = {
+  [Key in keyof T as T[Key] extends V ? never : Key]: T[Key];
+};
+
+export type OmitNeverValues<T> = OmitIfValueMatches<T, never>;
