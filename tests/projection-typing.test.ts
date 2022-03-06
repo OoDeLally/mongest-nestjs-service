@@ -5,8 +5,6 @@ import { ObjectId } from 'mongodb';
 import { expectType } from 'tsd';
 import { IsInclusionProjection, Projected } from '../src/projection';
 
-const IP_MARKER = ' _ip' as const;
-
 expectType<IsInclusionProjection<{}>>(false);
 expectType<IsInclusionProjection<{ _id: true }>>(true);
 expectType<IsInclusionProjection<{ _id: false }>>(false);
@@ -46,125 +44,141 @@ expectType<Projected<Foo, {}>>(
   },
 );
 
-expectType<Projected<Foo, { _id: false }>>({
-  a: 42,
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { _id: false }>>(
+  {} as {
+    a: number;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
   },
-});
+);
 
-expectType<Projected<Foo, { _id: true }>>({
-  _id: new ObjectId(),
-  [IP_MARKER]: null as never,
-});
-
-expectType<Projected<Foo, { a: 0; _id: true }>>({
-  _id: new ObjectId(),
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { _id: true }>>(
+  {} as {
+    _id: ObjectId;
+    ' _ip': never;
   },
-});
+);
 
-expectType<Projected<Foo, { a: 1 }>>({
-  _id: new ObjectId(),
-  a: 42,
-  [IP_MARKER]: null as never,
-});
-
-expectType<Projected<Foo, { a: 1; _id: true }>>({
-  _id: new ObjectId(),
-  a: 42,
-  [IP_MARKER]: null as never,
-});
-
-expectType<Projected<Foo, { a: 1; _id: false }>>({
-  a: 42,
-  [IP_MARKER]: null as never,
-});
-
-expectType<Projected<Foo, { a: 0 }>>({
-  _id: new ObjectId(),
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { a: 0; _id: true }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
   },
-});
+);
 
-expectType<Projected<Foo, { a: 0; _id: true }>>({
-  _id: new ObjectId(),
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { a: 1 }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    ' _ip': never;
   },
-});
+);
 
-expectType<Projected<Foo, { a: 0; _id: false }>>({
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { a: 1; _id: true }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    ' _ip': never;
   },
-});
+);
 
-expectType<Projected<Foo, { a: 1; extra: 1 }>>({
-  _id: new ObjectId(),
-  a: 42,
-  extra: 'unknown',
-} as {
-  _id: ObjectId;
-  a: number;
-  extra: unknown;
-  [IP_MARKER]: never;
-});
-
-expectType<Projected<Foo, { a: 0; extra: 0 }>>({
-  _id: new ObjectId(),
-  b: 'string',
-  c: 42,
-  d: {
-    e: 'eVal',
-    f: {
-      g: 'gVal',
-      h: 'hVal',
-    },
+expectType<Projected<Foo, { a: 1; _id: false }>>(
+  {} as {
+    a: number;
+    ' _ip': never;
   },
-});
+);
+
+expectType<Projected<Foo, { a: 0 }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
+  },
+);
+
+expectType<Projected<Foo, { a: 0; _id: true }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
+  },
+);
+
+expectType<Projected<Foo, { a: 0; _id: false }>>(
+  {} as {
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
+  },
+);
+
+expectType<Projected<Foo, { a: 1; extra: 1 }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    extra: unknown;
+    ' _ip': never;
+  },
+);
+
+expectType<Projected<Foo, { a: 0; extra: 0 }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        g: string;
+        h: string;
+      };
+    };
+  },
+);
 
 /** Nested fields */
 
-expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>({
-  _id: new ObjectId(),
-  a: 42,
-  extra: 'unknown',
-} as {
-  _id: ObjectId;
-  a: number;
-  extra: unknown;
-  [IP_MARKER]: never;
-});
+expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    extra: unknown;
+    ' _ip': never;
+  },
+);
