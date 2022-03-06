@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { EntityPayload, MongoPrimitiveObject } from './types';
 
 // Known limitations:
@@ -66,34 +65,28 @@ type PickAndUnwrapIfMatchRootKey<Proj extends MongoProjection, RootKey extends s
 
 // type Foo1 = PickAndUnwrapIfMatchRootKey<{ a: 1; 'd.f.g': 1; 'd.f.i': 1 }, 'd'>;
 
-type ExtractAndUnwrapIfMatchRootKey<
-  KeyList extends string,
-  RootKey extends string,
-> = KeyList extends `${RootKey}.${infer ChildKey}` ? ChildKey : never;
+// type ExtractAndUnwrapIfMatchRootKey<
+//   KeyList extends string,
+//   RootKey extends string,
+// > = KeyList extends `${RootKey}.${infer ChildKey}` ? ChildKey : never;
 
 // type Foo1 = ExtractAndUnwrapIfMatchRootKey<'a.d' | 'a.e' | 'c.c', 'a'>
 
-type Foo = {
-  _id: ObjectId;
-  a: number;
-  b: string;
-  c: number;
-  d: {
-    e: string;
-    f: {
-      g: string;
-      h: string;
-    };
-  };
-};
+// type Foo = {
+//   _id: ObjectId;
+//   a: number;
+//   b: string;
+//   c: number;
+//   d: {
+//     e: string;
+//     f: {
+//       g: string;
+//       h: string;
+//     };
+//   };
+// };
 
 type GetEntityValueTypeOrUnknown<D extends EntityPayload, K> = K extends keyof D ? D[K] : unknown;
-
-type GetEntityValueTypeOrNever<D extends EntityPayload | never, K> = D extends never
-  ? never
-  : K extends keyof D
-  ? D[K]
-  : never;
 
 type GetInclusiveProjectedKeys<P extends MongoProjection, IdSpecialTreatment = false> = string &
   (IdSpecialTreatment extends true
@@ -131,7 +124,7 @@ type GetExclusiveProjectedKeys<
       : Exclude<keyof D, keyof P> | '_id'
     : Exclude<keyof D, keyof P>);
 
-type FooProj = { a: 0; 'd.f.g': 0 };
+// type FooProj = { a: 0; 'd.f.g': 0 };
 
 type ExclusiveProjected<
   D extends EntityPayload,

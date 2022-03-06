@@ -182,6 +182,7 @@ expectType<Projected<Foo, { a: 0; extra: 0 }>>(
 
 /** Nested fields */
 
+/** Nested inclusive projection */
 expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
   {} as {
     _id: ObjectId;
@@ -232,6 +233,8 @@ expectType<{
   ' _ip': never;
 }>({} as Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.i': 1; 'd.e': 1 }>);
 
+/** Nested exclusive projection */
+
 expectType<Projected<Foo, { a: 0; 'd.f.g': 0 }>>(
   {} as {
     _id: ObjectId;
@@ -255,15 +258,24 @@ expectType<{
     e: string;
     f: {
       h: string;
+      i: string;
     };
   };
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0 }>);
 
+/** Unecessary projection */
 expectType<Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>>(
   {} as {
     _id: ObjectId;
     b: string;
     c: number;
+    d: {
+      e: string;
+      f: {
+        h: string;
+        i: string;
+      };
+    };
   },
 );
 
@@ -272,3 +284,30 @@ expectType<{
   b: string;
   c: number;
 }>({} as Projected<Foo, { a: 0; d: 0; 'd.f.g': 0 }>);
+
+/** Multiple projection with shared path prefix */
+expectType<Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        h: string;
+      };
+    };
+  },
+);
+
+expectType<{
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      h: string;
+    };
+  };
+}>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
