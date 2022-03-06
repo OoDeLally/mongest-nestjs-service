@@ -20,9 +20,9 @@ export type RecordValuesUnion<R extends EntityPayload> = R extends Record<string
 // type RVU3 = RecordValuesUnion<{ a: 0; b: 0; c: false }>;
 
 type IsMixedProjection<R extends EntityPayload> = Extract<RecordValuesUnion<R>, Falsy> extends never
-  ? false
+  ? false // Exclusion projection => Not mixed => false
   : Exclude<RecordValuesUnion<R>, Falsy> extends never
-  ? false
+  ? false // Inclusion projection => Not mixed => false
   : true;
 
 // type Tmp = Exclude<RVU3, Falsy>
@@ -46,7 +46,7 @@ export type IsInclusionProjection<P extends MongoProjection> = IsEmptyObject<P> 
     : P['_id'] extends number | boolean | string
     ? true // e.g. {_id: true}
     : never // invalid projection e.g. {a: true, b: false}
-  : IsMixedProjection<P> extends true
+  : IsMixedProjection<OmitId<P>> extends true
   ? never // invalid projections e.g. {a: 0, b: 1}
   : Exclude<RecordValuesUnion<OmitId<P>>, Falsy> extends never
   ? false // Exclusion projection e.g. {a: 0, b: false}

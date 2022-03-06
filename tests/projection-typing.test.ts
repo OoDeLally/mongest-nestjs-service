@@ -13,6 +13,8 @@ expectType<IsInclusionProjection<{ _id: false }>>(false);
 expectType<IsInclusionProjection<{ extraA: 1; extraB: 1 }>>(true);
 expectType<IsInclusionProjection<{ extraA: 0; extraB: 0 }>>(false);
 expectType<IsInclusionProjection<{ a: 1; b: 0 }>>({} as never);
+expectType<IsInclusionProjection<{ _id: true; a: 0 }>>(false);
+expectType<IsInclusionProjection<{ _id: false; a: 1 }>>(true);
 
 type Foo = {
   _id: ObjectId;
