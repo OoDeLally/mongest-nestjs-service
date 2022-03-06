@@ -112,6 +112,8 @@ type InclusiveProjected<
     | (IsRootProjection extends true ? ' _ip' : never)
     | GetRootKey<GetInclusiveProjectedKeys<P, IsRootProjection>>]: Key extends ' _ip'
     ? never
+    : P[Key] extends string
+    ? P[Key] // Projection is using a direct primitive.
     : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key> // primitive object e.g. Date, ObjectId.
     : ComputeInclusiveProjectedValue<
@@ -144,10 +146,9 @@ type ExclusiveProjected<
   P extends MongoProjection,
   IsRootProjection = false,
 > = {
-  [Key in GetExclusiveProjectedKeys<D, P, IsRootProjection>]: GetEntityValueTypeOrUnknown<
-    D,
-    Key
-  > extends MongoPrimitiveObject
+  [Key in GetExclusiveProjectedKeys<D, P, IsRootProjection>]: P[Key] extends string
+    ? never // Projection is using a direct primitive, but this is fobidden in an exclusion projection.
+    : GetEntityValueTypeOrUnknown<D, Key> extends MongoPrimitiveObject
     ? GetEntityValueTypeOrUnknown<D, Key>
     : ComputeExclusiveProjectedValue<
         GetEntityValueTypeOrUnknown<D, Key>,

@@ -192,7 +192,6 @@ expectType<Projected<Foo, { a: 1; 'd.f.g': 1 }>>(
         g: string;
       };
     }[];
-
     ' _ip': never;
   },
 );
@@ -312,3 +311,73 @@ expectType<{
     };
   }[];
 }>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
+
+/** Multiple projection with shared path prefix */
+expectType<Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>>(
+  {} as {
+    _id: ObjectId;
+    b: string;
+    c: number;
+    d: {
+      e: string;
+      f: {
+        h: string;
+      };
+    }[];
+  },
+);
+
+expectType<{
+  _id: ObjectId;
+  b: string;
+  c: number;
+  d: {
+    e: string;
+    f: {
+      h: string;
+    };
+  }[];
+}>({} as Projected<Foo, { a: 0; 'd.f.g': 0; 'd.f.i': 0 }>);
+
+/** Inclusive projection with string value */
+
+expectType<Projected<Foo, { a: 1; 'd.f.g': 1; 'd.f.foo': 'yay' }>>(
+  {} as {
+    _id: ObjectId;
+    a: number;
+    d: {
+      f: {
+        foo: 'yay';
+        g: string;
+      };
+    }[];
+    ' _ip': never;
+  },
+);
+
+expectType<{
+  _id: ObjectId;
+  a: number;
+  d: {
+    f: {
+      extraString: 'yay';
+      g: string;
+    };
+  }[];
+  ' _ip': never;
+}>(
+  {} as Projected<
+    Foo,
+    {
+      a: 1;
+      'd.f.g': 1;
+      'd.f.extraString': 'yay';
+    }
+  >,
+);
+
+/** Exclusive projection with string value */
+
+// Direct value in an exclusive projection is forbidden.
+expectType<Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>>({} as never);
+expectType<never>({} as Projected<Foo, { a: 0; 'd.f.foo': 'yay' }>);
