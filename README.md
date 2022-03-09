@@ -90,7 +90,7 @@ Mongoose return typing is often too constraining for no apparent good reason. It
 Mongest service documents are always **lean** instances of the entity class (except `aggregate()` method).
 
 In addition, when a projection is used, the return type automatically excludes the non-projected fields, so that you will encounter a typing error if you try to use them by mistake.
-Projected typing supports local field reference (`{foo: '$bar'}`), string substitution (`{foo: 'bar'}`), and operators `$`, `$slice`, `$elemMatch`.
+Projected typing supports local field reference (`{foo: '$bar'}`), string substitution (`{foo: 'bar'}`), and operators `$`, `$slice`, `$elemMatch`. See more about [Mongest Projection](https://github.com/OoDeLally/mongest-projection).
 
 ```ts
 const cat = await catService.findOne(
