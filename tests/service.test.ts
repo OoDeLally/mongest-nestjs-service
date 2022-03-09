@@ -138,7 +138,7 @@ describe('CatsService', () => {
   it('should findOne cat', async function () {
     await catService.insertMany([pogoCat, safiCat, ortieCat]);
     const cat = await catService.findOne({ name: /o/i }, {
-      projection: { name: 1 },
+      projection: { name: 1 } as const,
       skip: 1,
       sort: { name: 1 },
     } as const);

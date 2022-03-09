@@ -190,3 +190,13 @@ Note that it would still work with the vanilla `if (cat instanceof StrayCat)`, b
   * Because lean documents are used systematically, things like virtual fields or `populate()` are not directly possible.
     Of course if you *really* need one of these fancy mongoose features, you can always invoke the model's methods directly (e.g. `service.model.findOne().populate('myRefField').exec()`).
 
+
+## FAQ
+
+### Projections
+
+#### "My non-optional field is marked as `| undefined` in the projected document"
+
+You may have forgotten to declare your projection `as const` (see examples above).
+Failure to do so widens the projection type, and makes it impossible to guess whether projection is an inclusion or an exclusion.
+More about Typescript's type-widening: https://www.typescriptlang.org/play#example/type-widening-and-narrowing
