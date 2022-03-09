@@ -21,7 +21,7 @@ if (isEntityInstanceOf<Mother, Child>(mother, Child)) {
   expectType<Mother & Child>(mother);
 }
 
-const motherInclusionProjection = {} as Pick<Mother, 'a' | 'b'> & { ' _ip': never; h: unknown };
+const motherInclusionProjection = {} as Pick<Mother, 'a' | 'b'> & { h: unknown; ' _ip': never };
 
 if (isEntityInstanceOf(motherInclusionProjection, Child)) {
   expectType<{ a: string; b: string; h: unknown }>(motherInclusionProjection);
@@ -30,7 +30,11 @@ if (isEntityInstanceOf(motherInclusionProjection, Child)) {
   expectType<{ c: string }>(motherInclusionProjection);
 }
 
-const motherExclusionProjection = {} as Omit<Mother, 'a' | 'b'> & { a: undefined; b: undefined };
+const motherExclusionProjection = {} as Omit<Mother, 'a' | 'b'> & {
+  ' _ep': never;
+  a: undefined;
+  b: undefined;
+};
 
 if (isEntityInstanceOf(motherExclusionProjection, Child)) {
   expectType<Omit<Child, 'a' | 'b'> & { a: undefined; b: undefined }>(motherExclusionProjection);

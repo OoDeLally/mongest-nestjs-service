@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Binary, Code, ObjectId, Timestamp } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 // Do NOT use EntityPayload = Record<string, unknown>. Even if in practice it is the case,
 // TS considers that classes can be indexed by non-string keys.
@@ -12,7 +12,4 @@ export type ExtractIdType<EDoc extends EntityPayload> = '_id' extends keyof EDoc
   ? EDoc['_id']
   : ObjectId;
 
-export type OmitId<EDoc extends EntityPayload> = Omit<EDoc, '_id'>;
-
-// https://www.tutorialspoint.com/mongodb/mongodb_datatype.htm
-export type MongoPrimitiveObject = Timestamp | Symbol | Date | ObjectId | Binary | Code | RegExp;
+export type OmitId<T> = Omit<T, '_id'>;

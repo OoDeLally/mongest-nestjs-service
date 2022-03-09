@@ -1,6 +1,6 @@
 {
   "name": "mongest-service",
-  "version": "0.2.2",
+  "version": "0.3.2",
   "description": "Delightfully-typed Mongoose-wrapper NestJS-service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -49,6 +49,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "lodash": "^4.17.21",
+    "mongest-projection": "^0.0.4",
     "mongodb-memory-server": "^8.0.4",
     "prettier": "^2.5.1",
     "prettier-plugin-organize-imports": "^2.3.4",

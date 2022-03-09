@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Injectable, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { MongoProjection } from 'mongest-projection';
 import { UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
 import {
@@ -21,7 +22,6 @@ import {
   UpdateOneOptions,
 } from './MongestService';
 import { paginateQuery } from './pagination';
-import { MongoProjection } from './projection';
 import { getEntityClassForSchema } from './registerEntityClassForSchema';
 import { AbstractType, EntityPayload, ExtractIdType, OmitId } from './types';
 

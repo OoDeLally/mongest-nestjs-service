@@ -72,7 +72,7 @@ describe('CatsService', () => {
     const projectedCats = await catService.find(
       { name: /[ol]/i },
       {
-        projection: { name: 1, territorySize: 1, humanSlave: 1 },
+        projection: { name: 1, territorySize: 1, humanSlave: 1 } as const,
         skip: 1,
         limit: 2,
         sort: { name: 1 },

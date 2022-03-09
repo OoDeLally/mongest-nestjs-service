@@ -7,6 +7,7 @@ import { CatKind } from './cat.entity';
 export const pogoCat: OmitId<StrayCat> = {
   kind: CatKind.StrayCat,
   territorySize: 45,
+  enemyCount: 0,
   name: 'Pogo',
   age: 5,
 };
@@ -14,6 +15,7 @@ export const pogoCat: OmitId<StrayCat> = {
 export const ortieCat: OmitId<StrayCat> = {
   kind: CatKind.StrayCat,
   territorySize: 80,
+  enemyCount: 1,
   name: 'Ortie',
   age: 6,
 };
@@ -21,6 +23,7 @@ export const ortieCat: OmitId<StrayCat> = {
 export const safiCat: OmitId<StrayCat> = {
   kind: CatKind.StrayCat,
   territorySize: 80,
+  enemyCount: 1,
   name: 'Safi',
   age: 3,
 };

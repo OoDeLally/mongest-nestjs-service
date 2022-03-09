@@ -1,7 +1,7 @@
+import { MongoProjection, Projected } from 'mongest-projection';
 import { UpdateResult } from 'mongodb';
 import { FilterQuery, Model, PipelineStage, UpdateQuery } from 'mongoose';
 import { SortObject } from './pagination';
-import { MongoProjection, Projected } from './projection';
 import { EntityPayload, ExtractIdType, OmitId } from './types';
 
 export type CountDocumentsOptions = {

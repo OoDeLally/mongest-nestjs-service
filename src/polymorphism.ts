@@ -14,8 +14,10 @@ export function isEntityInstanceOf<
   doc: PickedDoc,
   classRef: Type<OtherClass>,
 ): doc is ' _ip' extends keyof PickedDoc
-  ? Pick<PickedDoc & OtherClass, keyof PickedDoc>
-  : OtherClass extends PickedDoc
+  ? // Exclusion Projection
+    Pick<PickedDoc & OtherClass, keyof PickedDoc>
+  : // Inclusion Projection
+  OtherClass extends PickedDoc
   ? OtherClass
   : PickedDoc & Omit<OtherClass, UndefinedFields<PickedDoc>>;
 
