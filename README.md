@@ -74,7 +74,7 @@ Mongest service methods only accept options that are really supported by the mon
 const cats = await catService.find(
   { name: /pogo/i },
   {
-    projection: { name: 1 },
+    projection: { name: 1 } as const,
     skip: 1,
     limit: 1,
     sort: { name: 1 }
@@ -93,7 +93,12 @@ In addition, when a projection is used, the return type automatically excludes t
 Projected typing supports local field reference (`{foo: '$bar'}`), string substitution (`{foo: 'bar'}`), and operators `$`, `$slice`, `$elemMatch`.
 
 ```ts
-const cat = await catService.findOne({ name: /pogo/i }, { projection: { name: 1 } });
+const cat = await catService.findOne(
+  { name: /pogo/i },
+  {
+    projection: { name: 1 } as const, // Note the `as const` which prevents type-widening.
+  },
+);
 if (cat) {
   const isCatInstance = cat instanceof Cat; // true
   const age = cats.age; // << TypeError: Property 'age' does not exist on type '{ name: string; _id: ObjectId; }'
@@ -158,7 +163,12 @@ While TS will not let you use non-projected fields, under the hood the docs are 
 const strayCat: StrayCat = { name: 'Billy', kind: 'StrayCat', territorySize: 45 }
 const homeCat: HomeCat = { name: 'Pogo', kind: 'HomeCat', humanSlave: 'Pascal' }
 await catService.insertMany([strayCat, HomeCat])
-const cats = await catService.find({}, { projection: { name: 1, territorySize: 1 } });
+const cats = await catService.find(
+  {},
+  {
+    projection: { name: 1, territorySize: 1 } as const, // Note the `as const` which prevents type-widening.
+  }
+);
 for (const cat of cats) {
   cat // <= Type is { name: string, territorySize: unknown }
   if (isEntityInstanceOf(cat, StrayCat)) {

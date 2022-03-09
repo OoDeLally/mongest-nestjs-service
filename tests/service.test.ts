@@ -137,10 +137,11 @@ describe('CatsService', () => {
 
   it('should findOne cat', async function () {
     await catService.insertMany([pogoCat, safiCat, ortieCat]);
-    const cat = await catService.findOne(
-      { name: /o/i },
-      { projection: { name: 1 }, skip: 1, sort: { name: 1 } },
-    );
+    const cat = await catService.findOne({ name: /o/i }, {
+      projection: { name: 1 },
+      skip: 1,
+      sort: { name: 1 },
+    } as const);
     expect(cat).to.be.an('object');
     expect(cat).to.be.instanceOf(StrayCat);
     expect(cat).not.be.instanceOf(MongooseDocument);
@@ -218,7 +219,7 @@ describe('CatsService', () => {
     const oldDoc = await catService.findOneAndUpdate(
       { name: /o/i },
       { name: pogoNewName1 },
-      { projection: { name: 1 } },
+      { projection: { name: 1 } as const },
     );
     expect(oldDoc).not.be.instanceOf(MongooseDocument);
     expect(oldDoc).to.be.instanceOf(StrayCat);
@@ -229,7 +230,7 @@ describe('CatsService', () => {
     const newDoc = await catService.findOneAndUpdate(
       { name: /o/i },
       { name: pogoNewName2 },
-      { projection: { name: 1 }, new: true },
+      { projection: { name: 1 } as const, new: true },
     );
     expect(newDoc).not.be.instanceOf(MongooseDocument);
     expect(newDoc).to.be.instanceOf(StrayCat);
@@ -237,7 +238,7 @@ describe('CatsService', () => {
 
     // Upsert
     const newOrtieDoc = await catService.findOneAndUpdate({ name: 'bouzigouloume' }, ortieCat, {
-      projection: { name: 1 },
+      projection: { name: 1 } as const,
       upsert: true,
     });
     expect(newOrtieDoc).to.be.null;
