@@ -74,7 +74,7 @@ Mongest service methods only accept options that are really supported by the mon
 const cats = await catService.find(
   { name: /pogo/i },
   {
-    projection: { name: 1 } as const,
+    projection: { name: 1 },
     skip: 1,
     limit: 1,
     sort: { name: 1 }
@@ -96,7 +96,7 @@ Projected typing supports local field reference (`{foo: '$bar'}`), string substi
 const cat = await catService.findOne(
   { name: /pogo/i },
   {
-    projection: { name: 1 } as const, // Note the `as const` which prevents type-widening.
+    projection: { name: 1 },
   },
 );
 if (cat) {
@@ -166,7 +166,7 @@ await catService.insertMany([strayCat, HomeCat])
 const cats = await catService.find(
   {},
   {
-    projection: { name: 1, territorySize: 1 } as const, // Note the `as const` which prevents type-widening.
+    projection: { name: 1, territorySize: 1 },
   }
 );
 for (const cat of cats) {
@@ -197,6 +197,27 @@ Note that it would still work with the vanilla `if (cat instanceof StrayCat)`, b
 
 #### "My non-optional field is marked as `| undefined` in the projected document"
 
-You may have forgotten to declare your projection `as const` (see examples above).
-Failure to do so widens the projection type, and makes it impossible to guess whether projection is an inclusion or an exclusion.
+This happens when it is impossible to guess whether the projection is an inclusion or an exclusion.
+
+```ts
+// BAD
+
+// Type `true` is widened to `boolean`. Impossible to guess.
+this.catService.find({}, {projection: { name: true } })
+
+const projectName = true; // Widened to `boolean`. Impossible to guess.
+this.catService.find({}, {projection: { name: projectName } })
+
+// GOOD
+
+// Type `true` is not widened to `boolean`. Projection can be guessed.
+this.catService.find({}, {projection: { name: true } as const })
+
+// BETTER
+
+// Type `1` is not widened to `number`. Projection can be guessed.
+// This works because projections accept `1 | 0` and not `number`.
+this.catService.find({}, {projection: { name: 1 } })
+```
+
 More about Typescript's type-widening: https://www.typescriptlang.org/play#example/type-widening-and-narrowing
